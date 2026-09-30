@@ -1,5 +1,7 @@
 package co.edu.poli.sw2.Aplicacion.Servicios;
 
+import java.util.List;
+
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Salida.RepositoryDron;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
@@ -20,7 +22,7 @@ public class CrearDronServicio implements CrearDronUseCase {
 
 	/** {@inheritDoc} */
 	@Override
-	public int crear(Dron dron, int pilotoId, int sensorId) {
-		return repository.crear(dron, pilotoId, sensorId);
+	public int crear(Dron dron, int pilotoId, List<Integer> sensorIds) {
+	    return repository.crear(dron, pilotoId, sensorIds);
 	}
 }

@@ -1,5 +1,7 @@
 package co.edu.poli.sw2.Infraestuctura.UI;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarDronUseCase;
@@ -325,9 +327,14 @@ public class DroneController {
 			drone.setFabricante(txtFabricante.getText());
 			drone.setPeso(Integer.parseInt(txtPeso.getText()));
 
-			// Guardar el dron y obtener el ID generado
-			int idGenerado = crearDronUseCase.crear(drone, pilotoId, sensorId);
+			List<Integer> sensorIds = new ArrayList<>();
+			sensorIds.add(sensorId);
 
+			int idGenerado = crearDronUseCase.crear(
+			    drone,
+			    pilotoId,
+			    sensorIds
+			);
 			limpiarCampos();
 			txtId.setText(String.valueOf(idGenerado));
 			refrescarTabla();
@@ -478,13 +485,25 @@ public class DroneController {
 			drone.setFabricante(txtFabricante.getText());
 			drone.setPeso(peso);
 
-			// Actualizar dron, piloto y sensor
-			if (editarDronUseCase.actualizar(drone, pilotoId, sensorId)) {
-				refrescarTabla();
-				mostrarAlerta(Alert.AlertType.INFORMATION, "Dron actualizado",
-						"Los cambios se guardaron correctamente.");
+			List<Integer> sensorIds = Arrays.asList(sensorId);
+
+			if (editarDronUseCase.actualizar(drone, pilotoId, sensorIds)) {
+
+			    refrescarTabla();
+
+			    mostrarAlerta(
+			        Alert.AlertType.INFORMATION,
+			        "Dron actualizado",
+			        "Los cambios se guardaron correctamente."
+			    );
+
 			} else {
-				mostrarAlerta(Alert.AlertType.WARNING, "Dron no encontrado", "No existe un dron con el ID ingresado.");
+
+			    mostrarAlerta(
+			        Alert.AlertType.WARNING,
+			        "Dron no encontrado",
+			        "No existe un dron con el ID ingresado."
+			    );
 			}
 
 		} catch (NumberFormatException e) {
