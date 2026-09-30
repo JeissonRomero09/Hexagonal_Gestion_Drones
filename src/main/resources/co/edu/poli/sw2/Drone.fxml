@@ -1,262 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.Cursor?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="430.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.poli.sw2.controller.DroneController">
-
+<AnchorPane minHeight="650.0" minWidth="1000.0" prefHeight="720.0" prefWidth="1280.0"
+		xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+		fx:controller="co.edu.poli.sw2.Infraestuctura.UI.DroneController">
 	<children>
-
-		<!-- ==================== FONDO ==================== -->
-
-		<ImageView fitHeight="445.0" fitWidth="621.0" layoutX="-14.0" layoutY="-13.0" preserveRatio="false">
-
-			<image>
-				<Image url="@../images/Fondo_D.png" />
-			</image>
-
+		<ImageView fitHeight="720.0" fitWidth="1280.0" preserveRatio="false" smooth="true"
+				AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<image><Image url="@images/Fondo_.jpg" /></image>
 		</ImageView>
-
-
-		<!-- ==================== BOTÓN CREAR ==================== -->
-
-		<Button fx:id="btnCrear" layoutX="318.0" layoutY="15.0" mnemonicParsing="false" style="-fx-background-color: transparent;                        -fx-border-color: transparent;">
-
-			<graphic>
-				<ImageView fitHeight="48.0" fitWidth="50.0">
-
-					<image>
-						<Image url="@../images/I_Agregar.png" />
-					</image>
-
-				</ImageView>
-			</graphic>
-
-		</Button>
-
-		<Text layoutX="338.0" layoutY="79.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Crear">
-
-			<font>
-				<Font name="System Bold" size="12.0" />
-			</font>
-
-		</Text>
-
-
-		<!-- ==================== BOTÓN BUSCAR ==================== -->
-
-		<Button fx:id="btnBuscar" layoutX="374.0" layoutY="14.0" mnemonicParsing="false" style="-fx-background-color: transparent;                        -fx-border-color: transparent;">
-
-			<graphic>
-				<ImageView fitHeight="49.0" fitWidth="59.0">
-
-					<image>
-						<Image url="@../images/I_Buscar.png" />
-					</image>
-
-				</ImageView>
-			</graphic>
-
-		</Button>
-
-		<Text layoutX="395.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buscar">
-
-			<font>
-				<Font name="System Bold" size="12.0" />
-			</font>
-
-		</Text>
-
-
-		<!-- ==================== BOTÓN EDITAR ==================== -->
-
-		<Button fx:id="btnActualizar" layoutX="437.0" layoutY="15.0" mnemonicParsing="false" style="-fx-background-color: transparent;                        -fx-border-color: transparent;">
-
-			<graphic>
-				<ImageView fitHeight="49.0" fitWidth="51.0">
-
-					<image>
-						<Image url="@../images/I_Editar.png" />
-					</image>
-
-				</ImageView>
-			</graphic>
-
-		</Button>
-
-		<Text layoutX="457.0" layoutY="79.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Editar">
-
-			<font>
-				<Font name="System Bold" size="12.0" />
-			</font>
-
-		</Text>
-
-
-		<!-- ==================== BOTÓN ELIMINAR ==================== -->
-
-		<Button fx:id="btnEliminar" layoutX="495.0" layoutY="15.0" mnemonicParsing="false" style="-fx-background-color: transparent;                        -fx-border-color: transparent;">
-
-			<graphic>
-				<ImageView fitHeight="49.0" fitWidth="51.0">
-
-					<image>
-						<Image url="@../images/I_Eliminar.png" />
-					</image>
-
-				</ImageView>
-			</graphic>
-
-		</Button>
-
-		<Text layoutX="509.0" layoutY="79.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Eliminar">
-
-			<font>
-				<Font name="System Bold" size="12.0" />
-			</font>
-
-		</Text>
-
-
-		<!-- ==================== ID ==================== -->
-
-		<TextField fx:id="txtId" layoutX="51.0" layoutY="28.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="233.0" promptText=" Id del dron" style="-fx-background-color: rgba(255,255,255,0.65);                           -fx-background-radius: 8;                           -fx-border-color: rgba(0,0,0,0.25);                           -fx-border-radius: 8;                           -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-		</TextField>
-
-
-		<!-- ==================== MODELO ==================== -->
-
-		<TextField fx:id="txtModelo" layoutX="59.0" layoutY="96.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="190.0" promptText="Modelo del dron" style="-fx-background-color: rgba(255,255,255,0.65);                           -fx-background-radius: 8;                           -fx-border-color: rgba(0,0,0,0.25);                           -fx-border-radius: 8;                           -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-		</TextField>
-
-
-		<!-- ==================== SERIAL ==================== -->
-
-		<TextField fx:id="txtSerial" layoutX="59.0" layoutY="145.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="190.0" promptText="Número de serial" style="-fx-background-color: rgba(255,255,255,0.65);                           -fx-background-radius: 8;                           -fx-border-color: rgba(0,0,0,0.25);                           -fx-border-radius: 8;                           -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-		</TextField>
-
-
-		<!-- ==================== FABRICANTE ==================== -->
-
-		<TextField fx:id="txtFabricante" layoutX="59.0" layoutY="194.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="190.0" promptText="Fabricante" style="-fx-background-color: rgba(255,255,255,0.65);                           -fx-background-radius: 8;                           -fx-border-color: rgba(0,0,0,0.25);                           -fx-border-radius: 8;                           -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-		</TextField>
-
-
-		<!-- ==================== PESO ==================== -->
-
-		<TextField fx:id="txtPeso" layoutX="59.0" layoutY="241.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="190.0" promptText="Peso del dron" style="-fx-background-color: rgba(255,255,255,0.65);                           -fx-background-radius: 8;                           -fx-border-color: rgba(0,0,0,0.25);                           -fx-border-radius: 8;                           -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-		</TextField>
-
-
-		<!-- ==================== PILOTO ==================== -->
-
-		<TextField fx:id="txtPiloto" layoutX="59.0" layoutY="289.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="190.0" promptText="Id del Piloto" style="-fx-background-color: rgba(255,255,255,0.65);                           -fx-background-radius: 8;                           -fx-border-color: rgba(0,0,0,0.25);                           -fx-border-radius: 8;                           -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-		</TextField>
-		<!-- ==================== SENSOR ==================== -->
-
-		<TextField fx:id="txtSensor" layoutX="59.0" layoutY="338.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="190.0" promptText="Id del sensor" style="-fx-background-color: rgba(255,255,255,0.65);            -fx-background-radius: 8;            -fx-border-color: rgba(0,0,0,0.25);            -fx-border-radius: 8;            -fx-font-size: 19px;">
-
-			<cursor>
-				<Cursor fx:constant="TEXT" />
-			</cursor>
-
-
-		</TextField>
-
-		<!-- ==================== ASTERISCOS ==================== -->
-
-		<Text layoutX="38.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
-		<Text layoutX="45.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
-		<Text layoutX="45.0" layoutY="171.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
-		<Text layoutX="45.0" layoutY="220.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
-		<Text layoutX="45.0" layoutY="267.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
-		<Text layoutX="45.0" layoutY="314.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
-		<Text layoutX="45.0" layoutY="364.0" strokeType="OUTSIDE" strokeWidth="0.0" text="*">
-
-			<font>
-				<Font name="System Bold" size="25.0" />
-			</font>
-
-		</Text>
-
+		<Rectangle fill="#07101dcc" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+		<VBox spacing="18.0" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+			<padding><Insets bottom="2.0" left="2.0" right="2.0" top="2.0" /></padding>
+			<children>
+				<HBox alignment="CENTER_LEFT" spacing="18.0" minHeight="74.0">
+					<children>
+						<VBox spacing="3.0"><children>
+							<Label text="OPERACIONES / FLOTA AÉREA" style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" />
+							<Label text="Gestión de drones" style="-fx-text-fill: white; -fx-font-size: 29px; -fx-font-weight: bold;" />
+						</children></VBox>
+						<Region HBox.hgrow="ALWAYS" />
+						<Label fx:id="lblEstado" text="Listo para gestionar la flota" wrapText="true" maxWidth="390.0" alignment="CENTER_RIGHT" style="-fx-text-fill: #e7f1f3; -fx-font-size: 13px;" />
+					</children>
+				</HBox>
+				<HBox spacing="16.0" VBox.vgrow="ALWAYS">
+					<children>
+						<VBox minWidth="340.0" prefWidth="390.0" maxWidth="430.0" spacing="15.0" style="-fx-background-color: rgba(7,19,31,0.91); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;">
+							<padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+							<children>
+								<VBox spacing="4.0"><children>
+									<Label text="FICHA DEL DRON" style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" />
+									<Label text="Datos y acciones" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+								</children></VBox>
+								<VBox spacing="6.0"><children>
+									<Label text="ID para buscar, editar o eliminar" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" />
+									<HBox spacing="8.0"><children>
+										<TextField fx:id="txtId" promptText="Ej. 12" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6; -fx-font-size: 14px;" />
+										<Button fx:id="btnBuscar" text="Buscar ID" minWidth="94.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
+									</children></HBox>
+								</children></VBox>
+								<GridPane hgap="12.0" vgap="12.0">
+									<columnConstraints><ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" /></columnConstraints>
+									<children>
+										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="0"><children><Label text="Serial" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtSerial" promptText="Número de serie" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0"><children><Label text="Modelo" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtModelo" promptText="Modelo" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1"><children><Label text="Fabricante" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtFabricante" promptText="Fabricante" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1"><children><Label text="Peso (kg)" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtPeso" promptText="Peso entero" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="2"><children><Label text="ID del piloto" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtPiloto" promptText="ID piloto" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2"><children><Label text="ID del sensor" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtSensor" promptText="ID sensor" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+									</children>
+								</GridPane>
+								<Region VBox.vgrow="ALWAYS" />
+								<Label text="Crear guarda un registro nuevo. Para editar, busca o selecciona un dron de la tabla." wrapText="true" style="-fx-text-fill: #aebfc5; -fx-font-size: 11px;" />
+								<HBox spacing="8.0"><children>
+									<Button fx:id="btnCrear" text="Crear" HBox.hgrow="ALWAYS" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
+									<Button fx:id="btnActualizar" text="Editar" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
+									<Button fx:id="btnEliminar" text="Eliminar" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" />
+								</children></HBox>
+							</children>
+						</VBox>
+						<VBox spacing="12.0" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(248,251,252,0.96); -fx-background-radius: 12;">
+							<padding><Insets bottom="18.0" left="18.0" right="18.0" top="18.0" /></padding>
+							<children>
+								<HBox alignment="CENTER_LEFT" spacing="12.0"><children>
+									<VBox spacing="3.0"><children><Label text="Inventario" style="-fx-text-fill: #142934; -fx-font-size: 21px; -fx-font-weight: bold;" /><Label fx:id="lblConteo" text="Sin cargar" style="-fx-text-fill: #60747d; -fx-font-size: 12px;" /></children></VBox>
+									<Region HBox.hgrow="ALWAYS" />
+									<Button fx:id="btnListar" text="Mostrar todos" minWidth="112.0" style="-fx-background-color: #142934; -fx-background-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
+								</children></HBox>
+								<TableView fx:id="tablaDrones" VBox.vgrow="ALWAYS" minHeight="300.0" style="-fx-background-color: transparent; -fx-background-radius: 6; -fx-border-color: #d9e2e5; -fx-border-radius: 6;">
+									<placeholder><Label text="No hay drones para mostrar" style="-fx-text-fill: #71848c;" /></placeholder>
+									<columns>
+										<TableColumn fx:id="colId" text="ID" prefWidth="48.0" />
+										<TableColumn fx:id="colSerial" text="Serial" prefWidth="112.0" />
+										<TableColumn fx:id="colModelo" text="Modelo" prefWidth="105.0" />
+										<TableColumn fx:id="colFabricante" text="Fabricante" prefWidth="112.0" />
+										<TableColumn fx:id="colPeso" text="Kg" prefWidth="48.0" />
+										<TableColumn fx:id="colPiloto" text="Piloto" prefWidth="66.0" />
+										<TableColumn fx:id="colSensor" text="Sensor" prefWidth="66.0" />
+								</columns>
+								</TableView>
+								<Label text="Selecciona una fila para cargar sus datos en la ficha." style="-fx-text-fill: #60747d; -fx-font-size: 11px;" />
+							</children>
+						</VBox>
+					</children>
+				</HBox>
+			</children>
+		</VBox>
 	</children>
-
 </AnchorPane>

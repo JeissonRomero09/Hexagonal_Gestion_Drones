@@ -1,4 +1,4 @@
-package co.edu.poli.sw2.Dao;
+package co.edu.poli.sw2.Infraestuctura.Persistencia;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import io.github.cdimascio.dotenv.Dotenv;
 
 /**
- * Clase encargada de gestionar la conexión con la base de datos.
+ * Proveedor Singleton de conexiones a la base de datos.
  *
  * <p>
  * La información de conexión se obtiene desde las variables de entorno
@@ -39,6 +39,8 @@ public class ConexionBD {
 	 * Contraseña utilizada para conectarse a la base de datos.
 	 */
 	private static final String PASSWORD = dotenv.get("DB_PASSWORD");
+	/** Instancia única compartida por todos los adaptadores de persistencia. */
+	private static final ConexionBD INSTANCIA = new ConexionBD();
 
 	/**
 	 * Constructor privado para evitar la creación de objetos de esta clase.
@@ -47,12 +49,21 @@ public class ConexionBD {
 	}
 
 	/**
+	 * Obtiene la instancia única del proveedor de conexiones.
+	 *
+	 * @return instancia compartida de {@code ConexionBD}
+	 */
+	public static ConexionBD getInstance() {
+		return INSTANCIA;
+	}
+
+	/**
 	 * Establece una conexión con la base de datos.
 	 *
 	 * @return objeto {@link Connection} correspondiente a la conexión.
 	 * @throws SQLException si ocurre un error durante la conexión.
 	 */
-	public static Connection conectar() throws SQLException {
+	public Connection conectar() throws SQLException {
 
 		return DriverManager.getConnection(
 				URL,

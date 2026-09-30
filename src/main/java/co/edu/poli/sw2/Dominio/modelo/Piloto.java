@@ -1,4 +1,4 @@
-package co.edu.poli.sw2.model;
+package co.edu.poli.sw2.Dominio.modelo;
 
 /**
  * Representa un piloto dentro del sistema de gestión de drones.
@@ -49,38 +49,83 @@ public class Piloto {
         this.telefono = telefono;
     }
 
+    /**
+     * Obtiene el identificador del piloto.
+     *
+     * @return identificador único
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Establece el identificador del piloto.
+     *
+     * @param id nuevo identificador
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    /**
+     * Obtiene el nombre del piloto.
+     *
+     * @return nombre del piloto
+     */
     public String getNombre() {
         return nombre;
     }
 
+    /**
+     * Establece el nombre del piloto.
+     *
+     * @param nombre nombre del piloto
+     */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
+    /**
+     * Obtiene el nivel de experiencia del piloto.
+     *
+     * @return descripción de la experiencia
+     */
     public String getExperiencia() {
         return experiencia;
     }
 
+    /**
+     * Establece el nivel de experiencia del piloto.
+     *
+     * @param experiencia descripción de la experiencia
+     */
     public void setExperiencia(String experiencia) {
         this.experiencia = experiencia;
     }
 
+    /**
+     * Obtiene el teléfono del piloto.
+     *
+     * @return número telefónico
+     */
     public int getTelefono() {
         return telefono;
     }
 
+    /**
+     * Establece el teléfono del piloto.
+     *
+     * @param telefono nuevo número telefónico
+     */
     public void setTelefono(int telefono) {
         this.telefono = telefono;
     }
 
+    /**
+     * Devuelve una representación textual del piloto.
+     *
+     * @return datos principales del piloto en formato de texto
+     */
     @Override
     public String toString() {
         return "Piloto{" +

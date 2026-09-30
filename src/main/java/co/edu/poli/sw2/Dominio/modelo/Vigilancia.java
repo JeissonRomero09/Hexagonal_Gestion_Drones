@@ -1,13 +1,10 @@
 
-package co.edu.poli.sw2.model;
+package co.edu.poli.sw2.Dominio.modelo;
 
 /**
  * Representa un dron especializado para actividades de vigilancia.
  *
- * <p>
- * Esta clase extiende la clase {@link Dron} e implementa el patrón Prototype
- * mediante un constructor de copia y el método {@code clone()}.
- * </p>
+ * <p>Esta clase extiende {@link Dron} con la capacidad de detección térmica.</p>
  *
  * @author Jeisson Romero
  * @version 3.0
@@ -20,7 +17,7 @@ public class Vigilancia extends Dron {
     private boolean deteccionTermica;
 
     /**
-     * Constructor por defecto de la clase Vigilancia.
+        * Crea un dron de vigilancia sin valores iniciales.
      */
     public Vigilancia() {
         super();
@@ -43,30 +40,7 @@ public class Vigilancia extends Dron {
         this.deteccionTermica = deteccionTermica;
     }
 
-    /**
-     * Constructor de copia de la clase Vigilancia.
-     *
-     * @param prototype instancia de Vigilancia que se utilizará como prototipo
-     */
-    public Vigilancia(Vigilancia prototype) {
-
-        super(prototype);
-
-        if (prototype != null) {
-            this.deteccionTermica = prototype.deteccionTermica;
-        }
-    }
-
-    /**
-     * Crea una copia de la instancia actual.
-     *
-     * @return una nueva instancia de Vigilancia con los mismos atributos
-     */
-    @Override
-    public Vigilancia clone() {
-
-        return new Vigilancia(this);
-    }
+    
 
     /**
      * Verifica si el dron cuenta con detección térmica.

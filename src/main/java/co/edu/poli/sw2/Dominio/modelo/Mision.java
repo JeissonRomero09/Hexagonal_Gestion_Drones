@@ -1,4 +1,4 @@
-package co.edu.poli.sw2.model;
+package co.edu.poli.sw2.Dominio.modelo;
 
 import java.util.Date;
 
@@ -38,6 +38,10 @@ public class Mision {
      * Dron asociado a la misión.
      */
     private Dron dron;
+
+    /** Crea una misión sin valores iniciales. */
+    public Mision() {
+    }
 
     /**
      * Obtiene el identificador de la misión.

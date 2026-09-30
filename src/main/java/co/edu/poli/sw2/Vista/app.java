@@ -1,5 +1,17 @@
-package co.edu.poli.sw2.main;
+package co.edu.poli.sw2.Vista;
 
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarListaDronesUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Servicios.BuscarDronServicio;
+import co.edu.poli.sw2.Aplicacion.Servicios.BuscarListaDronesServicio;
+import co.edu.poli.sw2.Aplicacion.Servicios.CrearDronServicio;
+import co.edu.poli.sw2.Aplicacion.Servicios.EditarDronServicio;
+import co.edu.poli.sw2.Aplicacion.Servicios.EliminarDronServicio;
+import co.edu.poli.sw2.Infraestuctura.Persistencia.MySqlDronRepository;
+import co.edu.poli.sw2.Infraestuctura.UI.DroneController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,6 +30,10 @@ import javafx.stage.Stage;
  */
 public class app extends Application {
 
+    /** Crea el punto de entrada de la aplicación JavaFX. */
+    public app() {
+    }
+
     /**
      * Inicia la aplicación JavaFX y configura la ventana principal.
      *
@@ -32,11 +48,20 @@ public class app extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource(
-                        "/co/edu/poli/sw2/view/drone.fxml"
-                )
-        );
+        MySqlDronRepository repository = new MySqlDronRepository();
+        CrearDronUseCase crear = new CrearDronServicio(repository);
+        BuscarDronUseCase buscar = new BuscarDronServicio(repository);
+        EliminarDronUseCase eliminar = new EliminarDronServicio(repository);
+        BuscarListaDronesUseCase listar = new BuscarListaDronesServicio(repository);
+        EditarDronUseCase editar = new EditarDronServicio(repository);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/poli/sw2/Drone.fxml"));
+        loader.setControllerFactory(controllerType -> {
+            if (controllerType == DroneController.class) {
+                return new DroneController(crear, buscar, listar, editar, eliminar);
+            }
+            throw new IllegalArgumentException("Controlador no configurado: " + controllerType.getName());
+        });
 
         AnchorPane root = loader.load();
 

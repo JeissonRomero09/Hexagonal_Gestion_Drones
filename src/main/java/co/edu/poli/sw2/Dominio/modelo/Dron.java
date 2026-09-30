@@ -1,4 +1,4 @@
-package co.edu.poli.sw2.model;
+package co.edu.poli.sw2.Dominio.modelo;
 
 /**
  * Representa un dron dentro del sistema de gestión.
@@ -56,6 +56,40 @@ public class Dron {
 	}
 
 	/**
+	 * Crea un dron con sus datos básicos.
+	 *
+	 * @param id identificador del dron
+	 * @param serial número de serie
+	 * @param modelo modelo del dron
+	 * @param fabricante fabricante del dron
+	 * @param peso peso del dron
+	 */
+	public Dron(int id, String serial, String modelo, String fabricante, int peso) {
+		this.id = id;
+		this.serial = serial;
+		this.modelo = modelo;
+		this.fabricante = fabricante;
+		this.peso = peso;
+	}
+
+	/**
+	 * Crea una copia de los datos de otro dron.
+	 *
+	 * @param prototype dron cuyos datos se copiarán; si es {@code null}, la instancia queda vacía
+	 */
+	public Dron(Dron prototype) {
+		if (prototype != null) {
+			this.id = prototype.id;
+			this.serial = prototype.serial;
+			this.modelo = prototype.modelo;
+			this.fabricante = prototype.fabricante;
+			this.peso = prototype.peso;
+			this.piloto = prototype.piloto;
+			this.sensores = prototype.sensores;
+		}
+	}
+
+	/**
 	 * Constructor que permite crear un dron con todos sus atributos.
 	 *
 	 * @param id identificador único del dron.
@@ -63,7 +97,7 @@ public class Dron {
 	 * @param modelo modelo del dron.
 	 * @param fabricante fabricante del dron.
 	 * @param peso peso del dron.
-	 * @param pilotoId identificador del piloto asociado.
+	 * @param piloto piloto asociado al dron.
 	 * @param sensores sensores asociados al dron.
 	 */
 	public Dron(int id, String serial, String modelo, String fabricante,
@@ -78,57 +112,71 @@ public class Dron {
 		this.sensores = sensores;
 	}
 
+	/** @return identificador único del dron */
 	public int getId() {
 		return id;
 	}
 
+	/** @param id nuevo identificador del dron */
 	public void setId(int id) {
 		this.id = id;
 	}
 
+	/** @return número de serie del dron */
 	public String getSerial() {
 		return serial;
 	}
 
+	/** @param serial nuevo número de serie */
 	public void setSerial(String serial) {
 		this.serial = serial;
 	}
 
+	/** @return modelo del dron */
 	public String getModelo() {
 		return modelo;
 	}
 
+	/** @param modelo nuevo modelo del dron */
 	public void setModelo(String modelo) {
 		this.modelo = modelo;
 	}
 
+	/** @return fabricante del dron */
 	public String getFabricante() {
 		return fabricante;
 	}
 
+	/** @param fabricante nuevo fabricante del dron */
 	public void setFabricante(String fabricante) {
 		this.fabricante = fabricante;
 	}
 
+	/** @return peso del dron */
 	public int getPeso() {
 		return peso;
 	}
 
+	/** @param peso nuevo peso del dron */
 	public void setPeso(int peso) {
 		this.peso = peso;
 	}
 
+	/** @return piloto asociado o {@code null} si no tiene asociación */
 	public Piloto getPiloto() {
 		return piloto;
 	}
 
+	/** @param piloto piloto que se asociará al dron */
 	public void setPiloto(Piloto piloto) {
 		this.piloto = piloto;
 	}
+	/** @return sensor asociado o {@code null} si no tiene asociación */
 	public Sensores getSensores() {
 		return sensores;
 	}
 
+	/** @param sensores sensor que se asociará al dron */
 	public void setSensores(Sensores sensores) {
 		this.sensores = sensores;
 	}
