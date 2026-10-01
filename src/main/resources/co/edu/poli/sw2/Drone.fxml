@@ -62,7 +62,7 @@
 										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1"><children><Label text="Fabricante" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtFabricante" promptText="Fabricante" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
 										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1"><children><Label text="Peso (kg)" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtPeso" promptText="Peso entero" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
 										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="2"><children><Label text="ID del piloto" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtPiloto" promptText="ID piloto" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
-										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2"><children><Label text="ID del sensor" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtSensor" promptText="ID sensor" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2"><children><Label text="IDs de sensores (separados por coma)" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtSensor" promptText="Ej. 1, 2, 3" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
 									</children>
 								</GridPane>
 								<Region VBox.vgrow="ALWAYS" />
@@ -91,7 +91,7 @@
 										<TableColumn fx:id="colFabricante" text="Fabricante" prefWidth="112.0" />
 										<TableColumn fx:id="colPeso" text="Kg" prefWidth="48.0" />
 										<TableColumn fx:id="colPiloto" text="Piloto" prefWidth="66.0" />
-										<TableColumn fx:id="colSensor" text="Sensor" prefWidth="66.0" />
+										<TableColumn fx:id="colSensor" text="Sensores" prefWidth="90.0" />
 								</columns>
 								</TableView>
 								<Label text="Selecciona una fila para cargar sus datos en la ficha." style="-fx-text-fill: #60747d; -fx-font-size: 11px;" />

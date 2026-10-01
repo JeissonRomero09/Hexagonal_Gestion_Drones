@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import co.edu.poli.sw2.Aplicacion.Puerto.Salida.RepositoryDron;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
@@ -34,8 +36,7 @@ public class MySqlDronRepository implements RepositoryDron {
 	 * Consulta utilizada para recuperar un dron junto con su piloto.
 	 *
 	 * <p>
-	 * La base de datos actual no contiene una columna sensor_id en la tabla dron,
-	 * por lo que el sensor no puede recuperarse mediante una relación persistente.
+	 * Los sensores se recuperan mediante la columna {@code sensores.dron_id}.
 	 * </p>
 	 */
 	private static final String SELECT_DRON = "SELECT d.id, d.serial, d.modelo, d.fabricante, d.peso, "
@@ -53,37 +54,15 @@ public class MySqlDronRepository implements RepositoryDron {
 	 */
 	@Override
 	public int crear(Dron dron, int pilotoId, List<Integer> sensorIds) {
+		List<Integer> idsValidados = validarSensorIds(sensorIds);
 
 		String insertDron = "INSERT INTO dron " + "(serial, modelo, fabricante, peso, piloto_id) "
 				+ "VALUES (?, ?, ?, ?, ?)";
-
-		String validarSensor = "SELECT id " + "FROM sensor " + "WHERE id = ?";
-
-		String insertDronSensor = "INSERT INTO dron_sensor (dron_id, sensor_id) " + "VALUES (?, ?)";
-
 		try (Connection connection = ConexionBD.getInstance().conectar()) {
 
 			connection.setAutoCommit(false);
 
 			try {
-
-				/*
-				 * 1. Verificar que los sensores existan.
-				 */
-				for (Integer sensorId : sensorIds) {
-
-					try (PreparedStatement statement = connection.prepareStatement(validarSensor)) {
-
-						statement.setInt(1, sensorId);
-
-						try (ResultSet resultSet = statement.executeQuery()) {
-
-							if (!resultSet.next()) {
-								throw new SQLException("El sensor con ID " + sensorId + " no existe.");
-							}
-						}
-					}
-				}
 
 				/*
 				 * 2. Crear el dron.
@@ -111,19 +90,7 @@ public class MySqlDronRepository implements RepositoryDron {
 					}
 				}
 
-				/*
-				 * 3. Asociar los sensores al dron.
-				 */
-				try (PreparedStatement statement = connection.prepareStatement(insertDronSensor)) {
-
-					for (Integer sensorId : sensorIds) {
-
-						statement.setInt(1, id);
-						statement.setInt(2, sensorId);
-
-						statement.executeUpdate();
-					}
-				}
+				asociarSensores(connection, id, idsValidados);
 
 				/*
 				 * 4. Confirmar toda la operación.
@@ -157,14 +124,17 @@ public class MySqlDronRepository implements RepositoryDron {
 
 			statement.setInt(1, id);
 
+			Dron dron = null;
 			try (ResultSet resultSet = statement.executeQuery()) {
-
 				if (resultSet.next()) {
-					return mapearDron(resultSet);
+					dron = mapearDron(resultSet);
 				}
-
-				return null;
 			}
+
+			if (dron != null) {
+				cargarSensores(connection, dron);
+			}
+			return dron;
 
 		} catch (SQLException exception) {
 
@@ -191,6 +161,10 @@ public class MySqlDronRepository implements RepositoryDron {
 				}
 			}
 
+			for (Dron dron : drones) {
+				cargarSensores(connection, dron);
+			}
+
 			return drones;
 
 		} catch (SQLException exception) {
@@ -199,28 +173,22 @@ public class MySqlDronRepository implements RepositoryDron {
 		}
 	}
 
-	/** * {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public boolean actualizar(Dron dron, int pilotoId, List<Integer> sensorIds) {
+		List<Integer> idsValidados = validarSensorIds(sensorIds);
 		String updateDron = "UPDATE dron SET " + "serial = ?, " + "modelo = ?, " + "fabricante = ?, " + "peso = ?, "
 				+ "piloto_id = ? " + "WHERE id = ?";
-		String validarSensor = "SELECT id " + "FROM sensor " + "WHERE id = ?";
-		String deleteSensores = "DELETE FROM dron_sensor " + "WHERE dron_id = ?";
-		String insertSensor = "INSERT INTO dron_sensor (dron_id, sensor_id) " + "VALUES (?, ?)";
+		String liberarSensores = "UPDATE sensores SET dron_id = NULL WHERE dron_id = ?";
+		String asignarSensor = "UPDATE sensores SET dron_id = ? WHERE id = ?";
+
 		try (Connection connection = ConexionBD.getInstance().conectar()) {
 			connection.setAutoCommit(false);
+
 			try {
-				/* * 1. Verifica que los sensores existan. */ for (Integer sensorId : sensorIds) {
-					try (PreparedStatement statement = connection.prepareStatement(validarSensor)) {
-						statement.setInt(1, sensorId);
-						try (ResultSet resultSet = statement.executeQuery()) {
-							if (!resultSet.next()) {
-								throw new SQLException("El sensor con ID " + sensorId + " no existe.");
-							}
-						}
-					}
-				}
-				/* * 2. Actualiza la información principal del dron. */ int updated;
+				validarSensoresExistentes(connection, idsValidados, dron.getId());
+
+				int updated;
 				try (PreparedStatement statement = connection.prepareStatement(updateDron)) {
 					statement.setString(1, dron.getSerial());
 					statement.setString(2, dron.getModelo());
@@ -230,29 +198,34 @@ public class MySqlDronRepository implements RepositoryDron {
 					statement.setInt(6, dron.getId());
 					updated = statement.executeUpdate();
 				}
-				/* * Si el dron no existe, no continúa. */ if (updated == 0) {
+
+				if (updated == 0) {
 					connection.rollback();
 					return false;
 				}
-				/* * 3. Elimina los sensores que tenía * anteriormente el dron. */ try (
-						PreparedStatement statement = connection.prepareStatement(deleteSensores)) {
+
+				try (PreparedStatement statement = connection.prepareStatement(liberarSensores)) {
 					statement.setInt(1, dron.getId());
 					statement.executeUpdate();
 				}
-				/* * 4. Inserta nuevamente los sensores * enviados en sensorIds. */ try (
-						PreparedStatement statement = connection.prepareStatement(insertSensor)) {
-					for (Integer sensorId : sensorIds) {
+
+				try (PreparedStatement statement = connection.prepareStatement(asignarSensor)) {
+					for (Integer sensorId : idsValidados) {
 						statement.setInt(1, dron.getId());
 						statement.setInt(2, sensorId);
-						statement.executeUpdate();
+						statement.addBatch();
 					}
+					statement.executeBatch();
 				}
-				/* * 5. Confirma toda la transacción. */ connection.commit();
+
+				connection.commit();
 				return true;
+
 			} catch (SQLException exception) {
 				rollback(connection, exception);
 				throw persistenceError("No se pudo actualizar el dron: " + exception.getMessage(), exception);
 			}
+
 		} catch (SQLException exception) {
 			throw persistenceError("No se pudo conectar o actualizar el dron: " + exception.getMessage(), exception);
 		}
@@ -264,9 +237,7 @@ public class MySqlDronRepository implements RepositoryDron {
 	@Override
 	public boolean eliminar(int id) {
 
-	    String deleteSensores =
-	            "DELETE FROM dron_sensor "
-	            + "WHERE dron_id = ?";
+	    String liberarSensores = "UPDATE sensores SET dron_id = NULL WHERE dron_id = ?";
 
 	    String deleteDron =
 	            "DELETE FROM dron "
@@ -279,11 +250,9 @@ public class MySqlDronRepository implements RepositoryDron {
 
 	        try {
 
-	            /*
-	             * Elimina las relaciones del dron con sus sensores.
-	             */
+	            /* Desasocia los sensores, pero conserva sus registros. */
 	            try (PreparedStatement statement =
-	                         connection.prepareStatement(deleteSensores)) {
+	                         connection.prepareStatement(liberarSensores)) {
 
 	                statement.setInt(1, id);
 	                statement.executeUpdate();
@@ -350,13 +319,82 @@ public class MySqlDronRepository implements RepositoryDron {
 			dron.setPiloto(piloto);
 		}
 
-		/*
-		 * El sensor no se asigna aquí porque la tabla dron no posee sensor_id y no
-		 * existe una relación persistente disponible para determinar qué sensor
-		 * pertenece al dron.
-		 */
-
 		return dron;
+	}
+
+	private void cargarSensores(Connection connection, Dron dron) throws SQLException {
+		String sql = "SELECT id, tipo, fabricante FROM sensores WHERE dron_id = ? ORDER BY id";
+		List<Sensores> sensores = new ArrayList<>();
+		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setInt(1, dron.getId());
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					sensores.add(new Sensores(
+							resultSet.getInt("id"),
+							resultSet.getString("tipo"),
+							resultSet.getString("fabricante")));
+				}
+			}
+		}
+		dron.setSensores(sensores);
+	}
+
+	private List<Integer> validarSensorIds(List<Integer> sensorIds) {
+		if (sensorIds == null) {
+			throw new IllegalArgumentException("La lista de IDs de sensores no puede ser null.");
+		}
+		List<Integer> ids = new ArrayList<>(sensorIds.size());
+		Set<Integer> idsUnicos = new HashSet<>();
+		for (Integer sensorId : sensorIds) {
+			if (sensorId == null || sensorId <= 0) {
+				throw new IllegalArgumentException("Los IDs de sensor deben ser enteros positivos.");
+			}
+			if (!idsUnicos.add(sensorId)) {
+				throw new IllegalArgumentException("El ID de sensor " + sensorId + " está repetido.");
+			}
+			ids.add(sensorId);
+		}
+		return ids;
+	}
+
+	private void validarSensoresExistentes(Connection connection, List<Integer> sensorIds, int dronId)
+			throws SQLException {
+		String sql = "SELECT dron_id FROM sensores WHERE id = ?";
+		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+			for (Integer sensorId : sensorIds) {
+				statement.setInt(1, sensorId);
+				try (ResultSet resultSet = statement.executeQuery()) {
+					if (!resultSet.next()) {
+						throw new SQLException("El sensor con ID " + sensorId + " no existe en la tabla sensores.");
+					}
+					int dronAsociado = resultSet.getInt("dron_id");
+					if (!resultSet.wasNull() && dronAsociado != dronId) {
+						throw new SQLException("El sensor con ID " + sensorId
+								+ " ya está asociado al dron " + dronAsociado + ".");
+					}
+				}
+			}
+		}
+	}
+
+	private void asociarSensores(Connection connection, int dronId, List<Integer> sensorIds) throws SQLException {
+		validarSensoresExistentes(connection, sensorIds, dronId);
+		String liberarActuales = "UPDATE sensores SET dron_id = NULL WHERE dron_id = ?";
+		String asociar = "UPDATE sensores SET dron_id = ? WHERE id = ?";
+
+		try (PreparedStatement statement = connection.prepareStatement(liberarActuales)) {
+			statement.setInt(1, dronId);
+			statement.executeUpdate();
+		}
+
+		try (PreparedStatement statement = connection.prepareStatement(asociar)) {
+			for (Integer sensorId : sensorIds) {
+				statement.setInt(1, dronId);
+				statement.setInt(2, sensorId);
+				statement.addBatch();
+			}
+			statement.executeBatch();
+		}
 	}
 
 	/**
@@ -386,6 +424,9 @@ public class MySqlDronRepository implements RepositoryDron {
 	 * @return excepción de persistencia
 	 */
 	private IllegalStateException persistenceError(String message, SQLException cause) {
+		if (cause.getErrorCode() == 1146) {
+			message += ". Compruebe que existan las tablas dron, piloto y sensores.";
+		}
 
 		return new IllegalStateException(message, cause);
 	}

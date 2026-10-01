@@ -1,8 +1,8 @@
 package co.edu.poli.sw2.Infraestuctura.UI;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarListaDronesUseCase;
@@ -10,6 +10,7 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
+import co.edu.poli.sw2.Dominio.modelo.Sensores;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -98,7 +99,7 @@ public class DroneController {
 	@FXML
 	private TableColumn<Dron, String> colPiloto;
 
-	/** Columna con el ID del sensor asociado. */
+	/** Columna con los IDs de los sensores asociados. */
 	@FXML
 	private TableColumn<Dron, String> colSensor;
 
@@ -139,7 +140,7 @@ public class DroneController {
 	private TextField txtPiloto;
 
 	/**
-	 * Campo de texto utilizado para ingresar el identificador del sensor.
+	 * Campo de texto para ingresar uno o más IDs de sensor, separados por comas.
 	 */
 	@FXML
 	private TextField txtSensor;
@@ -217,7 +218,7 @@ public class DroneController {
 		colPiloto.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
 				celda.getValue().getPiloto() == null ? "-" : String.valueOf(celda.getValue().getPiloto().getId())));
 		colSensor.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
-				celda.getValue().getSensores() == null ? "-" : String.valueOf(celda.getValue().getSensores().getId())));
+				formatearSensorIds(celda.getValue().getSensores())));
 	}
 
 	/** Carga el inventario completo y presenta el resultado en la tabla. */
@@ -255,8 +256,30 @@ public class DroneController {
 		txtFabricante.setText(dron.getFabricante());
 		txtPeso.setText(String.valueOf(dron.getPeso()));
 		txtPiloto.setText(dron.getPiloto() == null ? "" : String.valueOf(dron.getPiloto().getId()));
-		txtSensor.setText(dron.getSensores() == null ? "" : String.valueOf(dron.getSensores().getId()));
+		List<Sensores> sensores = dron.getSensores();
+		txtSensor.setText(sensores.isEmpty() ? "" : formatearSensorIds(sensores));
 		lblEstado.setText("Dron " + dron.getId() + " cargado en la ficha.");
+	}
+
+	private String formatearSensorIds(List<Sensores> sensores) {
+		if (sensores.isEmpty()) {
+			return "-";
+		}
+		return sensores.stream()
+				.map(sensor -> String.valueOf(sensor.getId()))
+				.collect(Collectors.joining(", "));
+	}
+
+	private List<Integer> leerSensorIds() {
+		List<Integer> sensorIds = new ArrayList<>();
+		for (String sensorId : txtSensor.getText().split(",", -1)) {
+			int id = Integer.parseInt(sensorId.trim());
+			if (id <= 0) {
+				throw new NumberFormatException("Los IDs de sensor deben ser positivos.");
+			}
+			sensorIds.add(id);
+		}
+		return sensorIds;
 	}
 
 	/**
@@ -292,7 +315,7 @@ public class DroneController {
 	 *
 	 * <p>
 	 * Valida que todos los campos requeridos estén diligenciados, obtiene los
-	 * identificadores del piloto y del sensor y registra el dron junto con sus
+	 * identificadores del piloto y de los sensores y registra el dron junto con sus
 	 * asociaciones correspondientes.
 	 * </p>
 	 *
@@ -317,7 +340,7 @@ public class DroneController {
 
 			// Obtener los identificadores
 			int pilotoId = Integer.parseInt(txtPiloto.getText());
-			int sensorId = Integer.parseInt(txtSensor.getText());
+			List<Integer> sensorIds = leerSensorIds();
 
 			// Crear objeto Dron
 			Dron drone = new Dron();
@@ -326,9 +349,6 @@ public class DroneController {
 			drone.setModelo(txtModelo.getText());
 			drone.setFabricante(txtFabricante.getText());
 			drone.setPeso(Integer.parseInt(txtPeso.getText()));
-
-			List<Integer> sensorIds = new ArrayList<>();
-			sensorIds.add(sensorId);
 
 			int idGenerado = crearDronUseCase.crear(
 			    drone,
@@ -341,10 +361,10 @@ public class DroneController {
 			mostrarAlerta(Alert.AlertType.INFORMATION, "Dron guardado",
 					"Registro creado con ID " + idGenerado + ".");
 
-		} catch (NumberFormatException e) {
+		} catch (IllegalArgumentException e) {
 
 			mostrarAlerta(Alert.AlertType.ERROR, "Datos inválidos",
-					"Peso, piloto y sensor deben ser valores numéricos.");
+					"Revise peso, piloto y los IDs de sensor: " + e.getMessage());
 
 		} catch (RuntimeException e) {
 
@@ -358,7 +378,7 @@ public class DroneController {
 	 *
 	 * <p>
 	 * Si el dron existe, se muestran sus datos en los campos correspondientes,
-	 * incluyendo el identificador del piloto y del sensor asociados.
+	 * incluyendo el identificador del piloto y todos los IDs de sensores asociados.
 	 * </p>
 	 *
 	 */
@@ -444,7 +464,7 @@ public class DroneController {
 	 *
 	 * <p>
 	 * Valida los datos ingresados, actualiza la información básica del dron y
-	 * actualiza las asociaciones correspondientes con el piloto y el sensor.
+	 * actualiza las asociaciones correspondientes con el piloto y los sensores.
 	 * </p>
 	 *
 	 */
@@ -474,7 +494,7 @@ public class DroneController {
 			int id = Integer.parseInt(txtId.getText());
 			int peso = Integer.parseInt(txtPeso.getText());
 			int pilotoId = Integer.parseInt(txtPiloto.getText());
-			int sensorId = Integer.parseInt(txtSensor.getText());
+			List<Integer> sensorIds = leerSensorIds();
 
 			// Crear objeto Dron
 			Dron drone = new Dron();
@@ -484,8 +504,6 @@ public class DroneController {
 			drone.setModelo(txtModelo.getText());
 			drone.setFabricante(txtFabricante.getText());
 			drone.setPeso(peso);
-
-			List<Integer> sensorIds = Arrays.asList(sensorId);
 
 			if (editarDronUseCase.actualizar(drone, pilotoId, sensorIds)) {
 
@@ -506,10 +524,10 @@ public class DroneController {
 			    );
 			}
 
-		} catch (NumberFormatException e) {
+		} catch (IllegalArgumentException e) {
 
 			mostrarAlerta(Alert.AlertType.ERROR, "Datos inválidos",
-					"ID, peso, piloto y sensor deben contener valores numéricos.");
+					"Revise ID, peso, piloto y los IDs de sensor: " + e.getMessage());
 
 		} catch (RuntimeException e) {
 
@@ -544,5 +562,11 @@ public class DroneController {
 				: tipo == Alert.AlertType.WARNING ? "#f4cf83" : "#81e4d0";
 		lblEstado.setText(titulo + " · " + mensaje);
 		lblEstado.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 13px;");
+
+		Alert alerta = new Alert(tipo);
+		alerta.setTitle(titulo);
+		alerta.setHeaderText(titulo);
+		alerta.setContentText(mensaje);
+		alerta.showAndWait();
 	}
 }

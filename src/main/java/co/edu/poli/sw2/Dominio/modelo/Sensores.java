@@ -9,8 +9,6 @@ public class Sensores {
     private String tipo;
     /** Fabricante del sensor. */
     private String fabricante;
-    /** Identificador del dron asociado, o {@code null} si no está asignado. */
-    private Integer dronId;
 
     /** Crea un sensor sin valores iniciales. */
     public Sensores() {
@@ -21,12 +19,10 @@ public class Sensores {
      *
      * @param tipo categoría del sensor
      * @param fabricante fabricante del sensor
-     * @param dronId identificador del dron asociado; puede ser {@code null}
      */
-    public Sensores(String tipo, String fabricante, Integer dronId) {
+    public Sensores(String tipo, String fabricante) {
         this.tipo = tipo;
         this.fabricante = fabricante;
-        this.dronId = dronId;
     }
 
     /**
@@ -35,13 +31,11 @@ public class Sensores {
      * @param id identificador único
      * @param tipo categoría del sensor
      * @param fabricante fabricante del sensor
-     * @param dronId identificador del dron asociado; puede ser {@code null}
      */
-    public Sensores(int id, String tipo, String fabricante, Integer dronId) {
+    public Sensores(int id, String tipo, String fabricante) {
         this.id = id;
         this.tipo = tipo;
         this.fabricante = fabricante;
-        this.dronId = dronId;
     }
 
     /** @return identificador único del sensor */
@@ -74,19 +68,9 @@ public class Sensores {
         this.fabricante = fabricante;
     }
 
-    /** @return ID del dron asociado o {@code null} si no tiene asociación */
-    public Integer getDronId() {
-        return dronId;
-    }
-
-    /** @param dronId ID del dron asociado, o {@code null} para desasociarlo */
-    public void setDronId(Integer dronId) {
-        this.dronId = dronId;
-    }
-
     /** @return representación textual de los datos del sensor */
     @Override
     public String toString() {
-        return "Sensores [id=" + id + ", tipo=" + tipo + ", fabricante=" + fabricante + ", dronId=" + dronId + "]";
+        return "Sensores [id=" + id + ", tipo=" + tipo + ", fabricante=" + fabricante + "]";
     }
 }
