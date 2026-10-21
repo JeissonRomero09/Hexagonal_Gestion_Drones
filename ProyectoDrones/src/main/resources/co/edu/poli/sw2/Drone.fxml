@@ -2,7 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -23,7 +25,7 @@
 			<image><Image url="@images/Fondo_.jpg" /></image>
 		</ImageView>
 		<Rectangle fill="#07101dcc" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-		<VBox spacing="18.0" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+		<VBox fx:id="vistaCrud" spacing="18.0" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
 			<padding><Insets bottom="2.0" left="2.0" right="2.0" top="2.0" /></padding>
 			<children>
 				<HBox alignment="CENTER_LEFT" minHeight="74.0" spacing="18.0">
@@ -33,6 +35,7 @@
 							<Label style="-fx-text-fill: white; -fx-font-size: 29px; -fx-font-weight: bold;" text="Gestión de drones" />
 						</children></VBox>
 						<Region HBox.hgrow="ALWAYS" />
+						<Button fx:id="btnIrClima" minWidth="120.0" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Clima" />
 						<Label fx:id="lblEstado" alignment="CENTER_RIGHT" maxWidth="390.0" style="-fx-text-fill: #e7f1f3; -fx-font-size: 13px;" text="Listo para gestionar la flota" wrapText="true" />
 					</children>
 				</HBox>
@@ -104,6 +107,50 @@
 						</VBox>
 					</children>
 				</HBox>
+			</children>
+		</VBox>
+		<VBox fx:id="vistaClima" managed="false" spacing="18.0" style="-fx-background-color: rgba(7,19,31,0.96); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;" visible="false" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+			<padding><Insets bottom="22.0" left="24.0" right="24.0" top="22.0" /></padding>
+			<children>
+				<HBox alignment="CENTER_LEFT" spacing="16.0"><children>
+					<VBox spacing="3.0"><children>
+						<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="CONDICIONES METEOROLÓGICAS" />
+						<Label style="-fx-text-fill: white; -fx-font-size: 25px; -fx-font-weight: bold;" text="Evaluación de vuelo" />
+					</children></VBox>
+					<Region HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnVolverCrud" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Volver a la flota" />
+				</children></HBox>
+				<VBox spacing="8.0"><children>
+					<Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Buscar una ciudad" />
+					<HBox spacing="10.0"><children>
+						<TextField fx:id="txtCiudad" promptText="Ciudad; pulsa Enter para buscar" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
+					</children></HBox>
+					<HBox alignment="CENTER_LEFT" spacing="10.0"><children>
+						<ComboBox fx:id="cmbCiudades" promptText="Selecciona una ubicación" prefWidth="520.0" HBox.hgrow="ALWAYS" />
+						<Button fx:id="btnConsultarClima" minWidth="160.0" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Consultar clima actual" />
+					</children></HBox>
+				</children></VBox>
+				<GridPane hgap="12.0" vgap="12.0">
+					<columnConstraints><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /></columnConstraints>
+					<children>
+						<VBox spacing="6.0" GridPane.columnIndex="0"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="TEMPERATURA" /><Label fx:id="lblTemperatura" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- °C" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="1"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="HUMEDAD" /><Label fx:id="lblHumedad" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- %" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="2"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="VIENTO" /><Label fx:id="lblViento" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- km/h" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="3"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="PRESIÓN" /><Label fx:id="lblPresion" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- hPa" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="4"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="VISIBILIDAD" /><Label fx:id="lblVisibilidad" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- km" /></children></VBox>
+					</children>
+				</GridPane>
+				<HBox alignment="CENTER_LEFT" spacing="14.0"><children>
+					<Button fx:id="btnEvaluarClima" minWidth="165.0" style="-fx-background-color: #f2c879; -fx-background-radius: 6; -fx-text-fill: #302515; -fx-font-weight: bold; -fx-cursor: hand;" text="Evaluar vuelo" />
+					<Label fx:id="lblResultadoVuelo" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Consulta el clima para evaluar" wrapText="true" HBox.hgrow="ALWAYS" />
+				</children></HBox>
+				<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="OBSERVADORES DE FLOTA" />
+				<HBox alignment="CENTER_LEFT" spacing="10.0"><children>
+					<ComboBox fx:id="cmbDronesClima" promptText="Selecciona un dron existente" prefWidth="370.0" HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnSuscribir" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Suscribir" />
+					<Button fx:id="btnCancelarSuscripcion" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" text="Cancelar suscripción" />
+				</children></HBox>
+				<ListView fx:id="listaActualizaciones" minHeight="150.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" VBox.vgrow="ALWAYS" />
 			</children>
 		</VBox>
 	</children>

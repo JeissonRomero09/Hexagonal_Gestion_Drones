@@ -1,5 +1,13 @@
 package co.edu.poli.sw2.Dominio.modelo.Chain;
 
-public class PresionValidacion {
+import co.edu.poli.sw2.Dominio.modelo.Weather;
 
+/** Rechaza presiones inferiores a 950 hPa o superiores a 1050 hPa. */
+public class PresionValidacion extends ClimaValidacion {
+	@Override
+	protected String validarRegla(Weather weather) {
+		return weather.getPresion() < 950 || weather.getPresion() > 1050
+				? "RECHAZADO: Presión fuera del rango de 950 a 1050 hPa."
+				: null;
+	}
 }
