@@ -1,5 +1,7 @@
 package co.edu.poli.sw2.Dominio.modelo;
 
+import java.util.function.Consumer;
+
 /** Contrato Subject solicitado para administrar las actualizaciones meteorológicas. */
 public interface WeatherObserver {
 	/**
@@ -9,7 +11,7 @@ public interface WeatherObserver {
 	 * @param observador receptor de las actualizaciones meteorológicas
 	 * @return {@code true} si se creó la suscripción
 	 */
-	boolean suscribir(Dron dron, WeatherUpdateObserver observador);
+	boolean suscribir(Dron dron, Consumer<Weather> observador);
 
 	/**
 	 * Cancela la suscripción de un dron.

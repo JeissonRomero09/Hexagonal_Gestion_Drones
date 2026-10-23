@@ -58,13 +58,9 @@ package "Dominio.modelo" as Domain {
   }
 
   interface WeatherObserver {
-    + suscribir(dron: Dron, observador: WeatherUpdateObserver): boolean
+    + suscribir(dron: Dron, observador: Consumer<Weather>): boolean
     + cancelar(dronId: int): boolean
     + notificar(weather: Weather): void
-  }
-
-  interface WeatherUpdateObserver {
-    + update(weather: Weather): void
   }
 
   package "Chain" {
@@ -122,6 +118,11 @@ package "Aplicacion" as Application {
   }
 
   package "observer" {
+    interface WeatherUpdateObserver {
+      + update(weather: Weather): void
+      + accept(weather: Weather): void
+    }
+
     class DashboardObserver {
       - refrescarDashboard: Consumer<Weather>
       + update(weather: Weather): void
@@ -159,8 +160,9 @@ Suscripcion --> WeatherUpdateObserver
 WeatherNotificationService ..> Weather : publica cinco medidas
 WeatherNotificationService ..|> WeatherObserver
 WeatherObserver ..> Dron : suscribir / cancelar
-WeatherObserver ..> Weather : notificar
+WeatherObserver ..> Weather : Consumer de notificación
 WeatherUpdateObserver ..> Weather : recibe actualización
+WeatherUpdateObserver ..|> Consumer
 DashboardObserver ..|> WeatherUpdateObserver
 ClimaServicio ..|> ClimaUseCase
 ClimaServicio --> ProveedorClima

@@ -13,13 +13,14 @@ package "Aplicación" {
   interface "ClimaUseCase\n(puerto de entrada)" as inPort
   component "ClimaServicio" as service
   component "WeatherNotificationService\n(Subject)" as subject
+  package "observer" {
     component "DashboardObserver\n(Observer)" as dashboard
+  }
 }
 
 package "Dominio" {
   class "Weather\n(5 medidas)" as weather
   interface "WeatherObserver\n(suscribir, cancelar, notificar)" as subjectPort
-  interface "WeatherUpdateObserver\n(update)" as observer
   class "Dron\n(modelo CRUD)" as drone
   package "Chain of Responsibility" {
     abstract class "ClimaValidacion\n(WeatherHandler)" as handler
@@ -50,9 +51,8 @@ api ..> weather : mapea temperatura, humedad,\nviento, presión y visibilidad
 service --> subject : publica cada respuesta
 subject ..|> subjectPort
 subject --> drone : registra por ID
-subject --> observer : suscribe y notifica
-dashboard ..|> observer
-observer ..> weather
+subject --> dashboard : suscribe y notifica
+dashboard ..> weather : update
 drone ..> subject : seleccionar para suscribirse
 ui --> handler : evalúa condiciones del vuelo
 handler <|-- TemperaturaValidacion
@@ -68,6 +68,7 @@ PresionValidacion --> VisibilidadValidacion : siguiente
 note bottom of subjectPort
 Según el contrato solicitado por el curso,
 WeatherObserver representa al Subject y
-declara suscribir, cancelar y notificar.
+declara suscribir(Dron, Consumer<Weather>),
+cancelar y notificar.
 end note
 @enduml

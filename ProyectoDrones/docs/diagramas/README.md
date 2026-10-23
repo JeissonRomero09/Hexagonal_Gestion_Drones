@@ -29,9 +29,11 @@ proyecto (`Weather`, `WeatherObserver`, `WeatherUpdateObserver`, `ClimaValidacio
 `WeatherNotificationService`, `DashboardObserver` y `GeoAPI`).
 
 Por solicitud del profesor, `WeatherObserver` define el contrato Subject con
-exactamente los métodos `suscribir`, `cancelar` y `notificar`.
-`WeatherUpdateObserver` representa el receptor de la actualización; así, `Dron`
-permanece como modelo CRUD y no administra sus propias suscripciones.
+exactamente los métodos `suscribir`, `cancelar` y `notificar`. El contrato
+`WeatherUpdateObserver` y `DashboardObserver` están en
+`Aplicacion.Servicios.observer`; el contrato de dominio recibe un `Consumer` de
+Java para mantener la dependencia hexagonal hacia el dominio, no al revés. Así,
+`Dron` permanece como modelo CRUD y no administra sus propias suscripciones.
 
 `GeoAPI` implementa en una sola clase los dos endpoints de Open-Meteo. Por eso
 el diagrama no inventa `GeoApiClient`, `OpenWeatherClient` ni adaptadores

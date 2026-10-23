@@ -5,11 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import co.edu.poli.sw2.Dominio.modelo.Dron;
 import co.edu.poli.sw2.Dominio.modelo.Weather;
 import co.edu.poli.sw2.Dominio.modelo.WeatherObserver;
-import co.edu.poli.sw2.Dominio.modelo.WeatherUpdateObserver;
 
 /** Coordina suscripciones de drones y difunde actualizaciones meteorológicas. */
 public class WeatherNotificationService implements WeatherObserver {
@@ -23,9 +23,9 @@ public class WeatherNotificationService implements WeatherObserver {
 	 * @return {@code true} cuando se registra la suscripción
 	 */
 	@Override
-	public synchronized boolean suscribir(Dron dron, WeatherUpdateObserver observador) {
+	public synchronized boolean suscribir(Dron dron, Consumer<Weather> observador) {
 		Dron dronSuscrito = Objects.requireNonNull(dron, "dron");
-		WeatherUpdateObserver observadorSuscrito = Objects.requireNonNull(observador, "observador");
+		Consumer<Weather> observadorSuscrito = Objects.requireNonNull(observador, "observador");
 		if (suscripciones.containsKey(dronSuscrito.getId())) {
 			return false;
 		}
@@ -59,7 +59,7 @@ public class WeatherNotificationService implements WeatherObserver {
 		IllegalStateException falloNotificacion = null;
 		for (Suscripcion suscripcion : suscripcionesActivas) {
 			try {
-				suscripcion.observador.update(weather);
+				suscripcion.observador.accept(weather);
 			} catch (RuntimeException exception) {
 				if (falloNotificacion == null) {
 					falloNotificacion = new IllegalStateException(
@@ -75,10 +75,10 @@ public class WeatherNotificationService implements WeatherObserver {
 
 	private static final class Suscripcion {
 		private final Dron dron;
-		private final WeatherUpdateObserver observador;
+		private final Consumer<Weather> observador;
 
 		/** Guarda el dron y el observador asociados a una suscripción. */
-		private Suscripcion(Dron dron, WeatherUpdateObserver observador) {
+		private Suscripcion(Dron dron, Consumer<Weather> observador) {
 			this.dron = dron;
 			this.observador = observador;
 		}
