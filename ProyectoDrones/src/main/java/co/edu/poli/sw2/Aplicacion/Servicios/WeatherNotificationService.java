@@ -53,6 +53,7 @@ public class WeatherNotificationService {
 	 * @param weather datos meteorológicos consultados
 	 */
 	public void notificar(Weather weather) {
+		Objects.requireNonNull(weather, "weather");
 		List<Dron> drones;
 		synchronized (this) {
 			drones = new ArrayList<>();
@@ -60,8 +61,20 @@ public class WeatherNotificationService {
 				drones.add(suscripcion.dron);
 			}
 		}
+		IllegalStateException falloNotificacion = null;
 		for (Dron dron : drones) {
-			dron.notifyObservers(weather);
+			try {
+				dron.notifyObservers(weather);
+			} catch (RuntimeException exception) {
+				if (falloNotificacion == null) {
+					falloNotificacion = new IllegalStateException(
+							"No se pudo notificar a uno o más drones suscritos.");
+				}
+				falloNotificacion.addSuppressed(exception);
+			}
+		}
+		if (falloNotificacion != null) {
+			throw falloNotificacion;
 		}
 	}
 

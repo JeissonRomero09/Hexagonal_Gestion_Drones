@@ -3,6 +3,7 @@ package co.edu.poli.sw2.Dominio.modelo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Representa un dron dentro del sistema de gestión.
@@ -53,7 +54,7 @@ public class Dron {
 	 */
 	private List<Sensores> sensores = new ArrayList<>();
 
-	private final List<WeatherObserver> observers = new ArrayList<>();
+	private final CopyOnWriteArrayList<WeatherObserver> observers = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Constructor vacío de la clase Dron.
@@ -194,9 +195,7 @@ public class Dron {
 	 */
 	public void subscribe(WeatherObserver observer) {
 		WeatherObserver nuevoObservador = Objects.requireNonNull(observer, "observer");
-		if (!observers.contains(nuevoObservador)) {
-			observers.add(nuevoObservador);
-		}
+		observers.addIfAbsent(nuevoObservador);
 	}
 
 	/**
@@ -214,8 +213,21 @@ public class Dron {
 	 * @param weather actualización que se distribuirá
 	 */
 	public void notifyObservers(Weather weather) {
-		for (WeatherObserver observer : new ArrayList<>(observers)) {
-			observer.update(weather);
+		Objects.requireNonNull(weather, "weather");
+		IllegalStateException falloNotificacion = null;
+		for (WeatherObserver observer : observers) {
+			try {
+				observer.update(weather);
+			} catch (RuntimeException exception) {
+				if (falloNotificacion == null) {
+					falloNotificacion = new IllegalStateException(
+							"No se pudo notificar a uno o más observadores del dron " + id + ".");
+				}
+				falloNotificacion.addSuppressed(exception);
+			}
+		}
+		if (falloNotificacion != null) {
+			throw falloNotificacion;
 		}
 	}
 

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -22,8 +23,19 @@ import co.edu.poli.sw2.Dominio.modelo.Weather;
 
 /** Adaptador HTTP de Open-Meteo para geocodificar ciudades y obtener el clima actual. */
 public class GeoAPI implements ProveedorClima {
-	private static final String GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
-	private static final String FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+	private static final String DEFAULT_GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
+	private static final String DEFAULT_FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+	private final String geocodingUrl;
+	private final String forecastUrl;
+
+	public GeoAPI() {
+		this(DEFAULT_GEOCODING_URL, DEFAULT_FORECAST_URL);
+	}
+
+	GeoAPI(String geocodingUrl, String forecastUrl) {
+		this.geocodingUrl = Objects.requireNonNull(geocodingUrl, "geocodingUrl");
+		this.forecastUrl = Objects.requireNonNull(forecastUrl, "forecastUrl");
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -31,7 +43,8 @@ public class GeoAPI implements ProveedorClima {
 		if (consulta == null || consulta.trim().length() < 2) {
 			return new LinkedHashMap<>();
 		}
-		String url = GEOCODING_URL + "?name=" + codificar(consulta.trim()) + "&count=10&language=es&format=json";
+		String url = geocodingUrl + "?name=" + codificar(consulta.trim())
+				+ "&count=10&language=es&format=json";
 		JsonObject respuesta = solicitarJson(url);
 		JsonArray resultados = respuesta.has("results") && respuesta.get("results").isJsonArray()
 				? respuesta.getAsJsonArray("results") : new JsonArray();
@@ -63,7 +76,7 @@ public class GeoAPI implements ProveedorClima {
 		if (latitud < -90 || latitud > 90 || longitud < -180 || longitud > 180) {
 			throw new IllegalArgumentException("Las coordenadas seleccionadas no son válidas.");
 		}
-		String url = FORECAST_URL + "?latitude=" + latitud + "&longitude=" + longitud
+		String url = forecastUrl + "?latitude=" + latitud + "&longitude=" + longitud
 				+ "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,surface_pressure,visibility"
 				+ "&wind_speed_unit=kmh&timezone=auto";
 		JsonObject respuesta = solicitarJson(url);

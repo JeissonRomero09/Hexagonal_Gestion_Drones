@@ -14,6 +14,7 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
+import co.edu.poli.sw2.Aplicacion.Servicios.observer.DashboardObserver;
 import co.edu.poli.sw2.Dominio.modelo.Chain.ClimaValidacion;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
 import co.edu.poli.sw2.Dominio.modelo.Sensores;
@@ -392,15 +393,18 @@ public class DroneController {
 			mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido", "Selecciona un dron existente.");
 			return;
 		}
-		WeatherObserver observador = weather -> {
+		WeatherObserver observador = new DashboardObserver(weather -> Platform.runLater(() -> {
+			mostrarDatosClima(weather);
 			String mensaje = String.format(Locale.ROOT,
 					"Dron %d recibió clima: %.1f °C, %.0f %%, %.1f km/h, %.1f hPa, %.1f km.",
 					dron.getId(), weather.getTemperatura(), weather.getHumedad(), weather.getVelocidadViento(),
 					weather.getPresion(), weather.getVisibilidad());
-			Platform.runLater(() -> listaActualizaciones.getItems().add(mensaje));
-		};
+			listaActualizaciones.getItems().add(mensaje);
+		}));
 		if (notificadorClima.suscribir(dron, observador)) {
 			listaActualizaciones.getItems().add("Suscripción activa: dron " + dron.getId() + ".");
+		} else {
+			listaActualizaciones.getItems().add("El dron " + dron.getId() + " ya estaba suscrito.");
 		}
 	}
 
@@ -646,6 +650,10 @@ public class DroneController {
 			int id = Integer.parseInt(txtId.getText());
 
 			if (eliminarDronUseCase.eliminar(id)) {
+				if (notificadorClima != null && notificadorClima.cancelarSuscripcion(id)) {
+					listaActualizaciones.getItems()
+							.add("Suscripción cancelada automáticamente: dron " + id + " eliminado.");
+				}
 				limpiarCampos();
 				refrescarTabla();
 				mostrarAlerta(Alert.AlertType.INFORMATION, "Dron eliminado", "El registro fue eliminado.");

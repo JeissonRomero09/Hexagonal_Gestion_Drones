@@ -13,23 +13,14 @@ public class ClimaServicio implements ClimaUseCase {
 	private final WeatherNotificationService notificador;
 
 	/**
-	 * Crea el servicio sin notificador, útil para consumidores que solo consultan clima.
+	 * Crea el servicio meteorológico y configura la publicación de cada consulta exitosa.
 	 *
 	 * @param proveedorClima adaptador que obtiene datos meteorológicos
-	 */
-	public ClimaServicio(ProveedorClima proveedorClima) {
-		this(proveedorClima, null);
-	}
-
-	/**
-	 * Crea el servicio con publicación de actualizaciones a observadores suscritos.
-	 *
-	 * @param proveedorClima adaptador que obtiene datos meteorológicos
-	 * @param notificador componente que difunde las actualizaciones
+	 * @param notificador componente que difunde las actualizaciones a los drones suscritos
 	 */
 	public ClimaServicio(ProveedorClima proveedorClima, WeatherNotificationService notificador) {
 		this.proveedorClima = Objects.requireNonNull(proveedorClima, "proveedorClima");
-		this.notificador = notificador;
+		this.notificador = Objects.requireNonNull(notificador, "notificador");
 	}
 
 	/** {@inheritDoc} */
@@ -42,9 +33,7 @@ public class ClimaServicio implements ClimaUseCase {
 	@Override
 	public Weather consultarClima(double latitud, double longitud) {
 		Weather weather = proveedorClima.consultarClima(latitud, longitud);
-		if (notificador != null) {
-			notificador.notificar(weather);
-		}
+		notificador.notificar(weather);
 		return weather;
 	}
 }
