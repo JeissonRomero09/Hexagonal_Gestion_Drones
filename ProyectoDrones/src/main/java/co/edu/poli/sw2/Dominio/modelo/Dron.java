@@ -3,7 +3,6 @@ package co.edu.poli.sw2.Dominio.modelo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Representa un dron dentro del sistema de gestión.
@@ -53,8 +52,6 @@ public class Dron {
 	 * Sensores asociados mediante la columna {@code sensores.dron_id}.
 	 */
 	private List<Sensores> sensores = new ArrayList<>();
-
-	private final CopyOnWriteArrayList<WeatherObserver> observers = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Constructor vacío de la clase Dron.
@@ -186,49 +183,6 @@ public class Dron {
 	/** @param sensores sensores que se asociarán al dron */
 	public void setSensores(List<Sensores> sensores) {
 		this.sensores = new ArrayList<>(Objects.requireNonNull(sensores, "sensores"));
-	}
-
-	/**
-	 * Suscribe un observador meteorológico al dron, evitando registros duplicados.
-	 *
-	 * @param observer observador que recibirá las actualizaciones
-	 */
-	public void subscribe(WeatherObserver observer) {
-		WeatherObserver nuevoObservador = Objects.requireNonNull(observer, "observer");
-		observers.addIfAbsent(nuevoObservador);
-	}
-
-	/**
-	 * Elimina la suscripción del observador indicado.
-	 *
-	 * @param observer observador que dejará de recibir actualizaciones
-	 */
-	public void unsubscribe(WeatherObserver observer) {
-		observers.remove(observer);
-	}
-
-	/**
-	 * Notifica a los observadores suscritos con los datos meteorológicos recibidos.
-	 *
-	 * @param weather actualización que se distribuirá
-	 */
-	public void notifyObservers(Weather weather) {
-		Objects.requireNonNull(weather, "weather");
-		IllegalStateException falloNotificacion = null;
-		for (WeatherObserver observer : observers) {
-			try {
-				observer.update(weather);
-			} catch (RuntimeException exception) {
-				if (falloNotificacion == null) {
-					falloNotificacion = new IllegalStateException(
-							"No se pudo notificar a uno o más observadores del dron " + id + ".");
-				}
-				falloNotificacion.addSuppressed(exception);
-			}
-		}
-		if (falloNotificacion != null) {
-			throw falloNotificacion;
-		}
 	}
 
 	/**

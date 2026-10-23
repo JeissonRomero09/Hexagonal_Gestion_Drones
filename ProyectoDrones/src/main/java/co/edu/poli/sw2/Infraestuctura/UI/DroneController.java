@@ -19,7 +19,7 @@ import co.edu.poli.sw2.Dominio.modelo.Chain.ClimaValidacion;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
 import co.edu.poli.sw2.Dominio.modelo.Sensores;
 import co.edu.poli.sw2.Dominio.modelo.Weather;
-import co.edu.poli.sw2.Dominio.modelo.WeatherObserver;
+import co.edu.poli.sw2.Dominio.modelo.WeatherUpdateObserver;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -393,7 +393,7 @@ public class DroneController {
 			mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido", "Selecciona un dron existente.");
 			return;
 		}
-		WeatherObserver observador = new DashboardObserver(weather -> Platform.runLater(() -> {
+		WeatherUpdateObserver observador = new DashboardObserver(weather -> Platform.runLater(() -> {
 			mostrarDatosClima(weather);
 			String mensaje = String.format(Locale.ROOT,
 					"Dron %d recibió clima: %.1f °C, %.0f %%, %.1f km/h, %.1f hPa, %.1f km.",
@@ -410,7 +410,7 @@ public class DroneController {
 
 	private void cancelarSuscripcion() {
 		Dron dron = cmbDronesClima.getValue();
-		if (dron == null || !notificadorClima.cancelarSuscripcion(dron.getId())) {
+		if (dron == null || !notificadorClima.cancelar(dron.getId())) {
 			mostrarAlerta(Alert.AlertType.WARNING, "Sin suscripción", "Selecciona un dron suscrito.");
 			return;
 		}
@@ -650,7 +650,7 @@ public class DroneController {
 			int id = Integer.parseInt(txtId.getText());
 
 			if (eliminarDronUseCase.eliminar(id)) {
-				if (notificadorClima != null && notificadorClima.cancelarSuscripcion(id)) {
+				if (notificadorClima != null && notificadorClima.cancelar(id)) {
 					listaActualizaciones.getItems()
 							.add("Suscripción cancelada automáticamente: dron " + id + " eliminado.");
 				}

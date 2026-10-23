@@ -9,9 +9,10 @@ import java.util.Objects;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
 import co.edu.poli.sw2.Dominio.modelo.Weather;
 import co.edu.poli.sw2.Dominio.modelo.WeatherObserver;
+import co.edu.poli.sw2.Dominio.modelo.WeatherUpdateObserver;
 
 /** Coordina suscripciones de drones y difunde actualizaciones meteorológicas. */
-public class WeatherNotificationService {
+public class WeatherNotificationService implements WeatherObserver {
 	private final Map<Integer, Suscripcion> suscripciones = new LinkedHashMap<>();
 
 	/**
@@ -21,13 +22,13 @@ public class WeatherNotificationService {
 	 * @param observador receptor de los datos meteorológicos
 	 * @return {@code true} cuando se registra la suscripción
 	 */
-	public synchronized boolean suscribir(Dron dron, WeatherObserver observador) {
+	@Override
+	public synchronized boolean suscribir(Dron dron, WeatherUpdateObserver observador) {
 		Dron dronSuscrito = Objects.requireNonNull(dron, "dron");
-		WeatherObserver observadorSuscrito = Objects.requireNonNull(observador, "observador");
+		WeatherUpdateObserver observadorSuscrito = Objects.requireNonNull(observador, "observador");
 		if (suscripciones.containsKey(dronSuscrito.getId())) {
 			return false;
 		}
-		dronSuscrito.subscribe(observadorSuscrito);
 		suscripciones.put(dronSuscrito.getId(), new Suscripcion(dronSuscrito, observadorSuscrito));
 		return true;
 	}
@@ -38,13 +39,9 @@ public class WeatherNotificationService {
 	 * @param dronId identificador del dron
 	 * @return {@code true} si existía una suscripción para ese ID
 	 */
-	public synchronized boolean cancelarSuscripcion(int dronId) {
-		Suscripcion suscripcion = suscripciones.remove(dronId);
-		if (suscripcion == null) {
-			return false;
-		}
-		suscripcion.dron.unsubscribe(suscripcion.observador);
-		return true;
+	@Override
+	public synchronized boolean cancelar(int dronId) {
+		return suscripciones.remove(dronId) != null;
 	}
 
 	/**
@@ -52,23 +49,21 @@ public class WeatherNotificationService {
 	 *
 	 * @param weather datos meteorológicos consultados
 	 */
+	@Override
 	public void notificar(Weather weather) {
 		Objects.requireNonNull(weather, "weather");
-		List<Dron> drones;
+		List<Suscripcion> suscripcionesActivas;
 		synchronized (this) {
-			drones = new ArrayList<>();
-			for (Suscripcion suscripcion : suscripciones.values()) {
-				drones.add(suscripcion.dron);
-			}
+			suscripcionesActivas = new ArrayList<>(suscripciones.values());
 		}
 		IllegalStateException falloNotificacion = null;
-		for (Dron dron : drones) {
+		for (Suscripcion suscripcion : suscripcionesActivas) {
 			try {
-				dron.notifyObservers(weather);
+				suscripcion.observador.update(weather);
 			} catch (RuntimeException exception) {
 				if (falloNotificacion == null) {
 					falloNotificacion = new IllegalStateException(
-							"No se pudo notificar a uno o más drones suscritos.");
+							"No se pudo notificar a uno o más observadores meteorológicos.");
 				}
 				falloNotificacion.addSuppressed(exception);
 			}
@@ -80,10 +75,10 @@ public class WeatherNotificationService {
 
 	private static final class Suscripcion {
 		private final Dron dron;
-		private final WeatherObserver observador;
+		private final WeatherUpdateObserver observador;
 
 		/** Guarda el dron y el observador asociados a una suscripción. */
-		private Suscripcion(Dron dron, WeatherObserver observador) {
+		private Suscripcion(Dron dron, WeatherUpdateObserver observador) {
 			this.dron = dron;
 			this.observador = observador;
 		}

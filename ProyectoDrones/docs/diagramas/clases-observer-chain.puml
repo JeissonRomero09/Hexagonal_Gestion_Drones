@@ -28,10 +28,6 @@ package "Dominio.modelo" as Domain {
     - peso: int
     - piloto: Piloto
     - sensores: List<Sensores>
-    - observers: List<WeatherObserver>
-    + subscribe(observer: WeatherObserver): void
-    + unsubscribe(observer: WeatherObserver): void
-    + notifyObservers(weather: Weather): void
   }
 
   class Sensores {
@@ -62,6 +58,12 @@ package "Dominio.modelo" as Domain {
   }
 
   interface WeatherObserver {
+    + suscribir(dron: Dron, observador: WeatherUpdateObserver): boolean
+    + cancelar(dronId: int): boolean
+    + notificar(weather: Weather): void
+  }
+
+  interface WeatherUpdateObserver {
     + update(weather: Weather): void
   }
 
@@ -112,14 +114,11 @@ package "Aplicacion" as Application {
 
   class WeatherNotificationService <<Subject>> {
     - suscripciones: Map<Integer, Suscripcion>
-    + suscribir(dron: Dron, observador: WeatherObserver): boolean
-    + cancelarSuscripcion(dronId: int): boolean
-    + notificar(weather: Weather): void
   }
 
   class Suscripcion <<clase interna>> {
     - dron: Dron
-    - observador: WeatherObserver
+    - observador: WeatherUpdateObserver
   }
 
   package "observer" {
@@ -153,13 +152,16 @@ Dron "0..*" --> "1" Piloto : piloto
 Dron "1" o-- "0..*" Sensores : sensores
 Dron "1" <-- "0..*" Mision : dron
 
-Dron "1" o-- "0..*" WeatherObserver : observers
-WeatherObserver ..> Weather : recibe actualización
+Dron "1" <-- "0..*" Suscripcion : identificado por
 WeatherNotificationService *-- "0..*" Suscripcion
 Suscripcion --> Dron
-Suscripcion --> WeatherObserver
+Suscripcion --> WeatherUpdateObserver
 WeatherNotificationService ..> Weather : publica cinco medidas
-DashboardObserver ..|> WeatherObserver
+WeatherNotificationService ..|> WeatherObserver
+WeatherObserver ..> Dron : suscribir / cancelar
+WeatherObserver ..> Weather : notificar
+WeatherUpdateObserver ..> Weather : recibe actualización
+DashboardObserver ..|> WeatherUpdateObserver
 ClimaServicio ..|> ClimaUseCase
 ClimaServicio --> ProveedorClima
 ClimaServicio --> WeatherNotificationService : publica cada consulta exitosa
@@ -181,6 +183,12 @@ note right of WeatherNotificationService
 Se suscribe y cancela por ID de dron.
 Cada actualización entrega temperatura,
 humedad, viento, presión y visibilidad.
+end note
+
+note right of WeatherObserver
+Por petición del curso, esta interfaz
+define el contrato del Subject y declara
+exactamente suscribir, cancelar y notificar.
 end note
 
 note right of GeoAPI

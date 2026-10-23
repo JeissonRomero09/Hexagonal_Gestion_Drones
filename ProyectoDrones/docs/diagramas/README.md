@@ -23,10 +23,15 @@ km/h, hPa y km.
 ## Correspondencia con el código
 
 El diagrama de clases conserva los nombres y las responsabilidades reales del
-proyecto (`Weather`, `WeatherObserver`, `ClimaValidacion`,
+proyecto (`Weather`, `WeatherObserver`, `WeatherUpdateObserver`, `ClimaValidacion`,
 `TemperaturaValidacion`, `HumedadValidacion`, `VientoValidacion`,
 `PresionValidacion`, `VisibilidadValidacion`, `ClimaServicio`,
 `WeatherNotificationService`, `DashboardObserver` y `GeoAPI`).
+
+Por solicitud del profesor, `WeatherObserver` define el contrato Subject con
+exactamente los métodos `suscribir`, `cancelar` y `notificar`.
+`WeatherUpdateObserver` representa el receptor de la actualización; así, `Dron`
+permanece como modelo CRUD y no administra sus propias suscripciones.
 
 `GeoAPI` implementa en una sola clase los dos endpoints de Open-Meteo. Por eso
 el diagrama no inventa `GeoApiClient`, `OpenWeatherClient` ni adaptadores
