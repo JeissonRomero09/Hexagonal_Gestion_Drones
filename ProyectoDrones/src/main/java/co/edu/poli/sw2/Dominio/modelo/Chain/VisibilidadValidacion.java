@@ -6,6 +6,6 @@ import co.edu.poli.sw2.Dominio.modelo.Weather;
 public class VisibilidadValidacion extends ClimaValidacion {
 	@Override
 	protected String validarRegla(Weather weather) {
-		return weather.getVisibilidad() < 5 ? "RECHAZADO: Visibilidad inferior a 5 km." : null;
+		return weather.getVisibilidad() < 5 ? "Visibilidad inferior a 5 km." : null;
 	}
 }

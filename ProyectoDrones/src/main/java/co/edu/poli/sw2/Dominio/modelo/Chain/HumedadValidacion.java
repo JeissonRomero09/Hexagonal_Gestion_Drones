@@ -6,6 +6,6 @@ import co.edu.poli.sw2.Dominio.modelo.Weather;
 public class HumedadValidacion extends ClimaValidacion {
 	@Override
 	protected String validarRegla(Weather weather) {
-		return weather.getHumedad() > 85 ? "RECHAZADO: Humedad superior al 85 %." : null;
+		return weather.getHumedad() > 85 ? "Humedad superior al 85 %." : null;
 	}
 }

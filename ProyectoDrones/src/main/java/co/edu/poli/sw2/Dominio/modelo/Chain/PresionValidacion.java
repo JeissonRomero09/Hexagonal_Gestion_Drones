@@ -7,7 +7,7 @@ public class PresionValidacion extends ClimaValidacion {
 	@Override
 	protected String validarRegla(Weather weather) {
 		return weather.getPresion() < 950 || weather.getPresion() > 1050
-				? "RECHAZADO: Presión fuera del rango de 950 a 1050 hPa."
+				? "Presión fuera del rango de 950 a 1050 hPa."
 				: null;
 	}
 }

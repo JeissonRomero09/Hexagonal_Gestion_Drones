@@ -23,20 +23,17 @@ km/h, hPa y km.
 ## Correspondencia con el código
 
 El diagrama de clases conserva los nombres y las responsabilidades reales del
-proyecto (`Weather`, `WeatherObserver`, `WeatherUpdateObserver`, `ClimaValidacion`,
+proyecto (`Weather`, `WeatherObserver`, `ClimaValidacion`,
 `TemperaturaValidacion`, `HumedadValidacion`, `VientoValidacion`,
 `PresionValidacion`, `VisibilidadValidacion`, `ClimaServicio`,
 `WeatherNotificationService`, `DashboardObserver` y `GeoAPI`).
 
-Por solicitud del profesor, `WeatherObserver` define el contrato Subject con
-exactamente los métodos `suscribir`, `cancelar` y `notificar`. El contrato
-`WeatherUpdateObserver` y `DashboardObserver` están en
-`Aplicacion.Servicios.observer`; el contrato de dominio recibe un `Consumer` de
-Java para mantener la dependencia hexagonal hacia el dominio, no al revés. Así,
-`Dron` permanece como modelo CRUD y no administra sus propias suscripciones.
+`Dron` mantiene una lista de `WeatherObserver` y expone `subscribe`,
+`unsubscribe` y `notifyObservers`. `WeatherNotificationService` administra las
+suscripciones dinámicas de múltiples drones y observadores.
+`DashboardObserver` implementa la interfaz de dominio en la capa de aplicación;
+actualiza la vista y evalúa automáticamente la cadena al recibir el clima.
 
 `GeoAPI` implementa en una sola clase los dos endpoints de Open-Meteo. Por eso
 el diagrama no inventa `GeoApiClient`, `OpenWeatherClient` ni adaptadores
-separados. Actualmente `DashboardObserver` es el único observador concreto;
-`LoggerObserver`, `ConsoleObserver` y `FlightStatusObserver` no están
-implementados y no se muestran como clases existentes.
+separados. `DashboardObserver` es el observador concreto implementado.

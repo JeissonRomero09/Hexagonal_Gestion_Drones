@@ -4,9 +4,10 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import co.edu.poli.sw2.Dominio.modelo.Weather;
+import co.edu.poli.sw2.Dominio.modelo.WeatherObserver;
 
 /** Adapta las actualizaciones del clima a una acción de refresco del dashboard. */
-public final class DashboardObserver implements WeatherUpdateObserver {
+public final class DashboardObserver implements WeatherObserver {
 	private final Consumer<Weather> refrescarDashboard;
 
 	/**

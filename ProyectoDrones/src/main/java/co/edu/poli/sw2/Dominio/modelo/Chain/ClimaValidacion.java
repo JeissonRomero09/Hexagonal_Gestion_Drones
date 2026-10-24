@@ -23,15 +23,15 @@ public abstract class ClimaValidacion {
 	 * Evalúa esta regla y continúa solo si no rechaza las condiciones.
 	 *
 	 * @param weather observación que se evaluará
-	 * @return motivo del primer rechazo o {@code APTO PARA VOLAR}
+	 * @return resultado de operación o motivo de la primera regla incumplida
 	 */
 	public final String evaluar(Weather weather) {
 		Objects.requireNonNull(weather, "weather");
 		String rechazo = validarRegla(weather);
 		if (rechazo != null) {
-			return rechazo;
+			return "CLIMA NO APTO PARA OPERACIÓN DE DRONES: " + rechazo;
 		}
-		return siguiente == null ? "APTO PARA VOLAR" : siguiente.evaluar(weather);
+		return siguiente == null ? "CLIMA APTO PARA OPERACIÓN DE DRONES" : siguiente.evaluar(weather);
 	}
 
 	/** Evalúa la regla específica implementada por cada eslabón. */

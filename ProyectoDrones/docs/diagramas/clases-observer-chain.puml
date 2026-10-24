@@ -28,6 +28,10 @@ package "Dominio.modelo" as Domain {
     - peso: int
     - piloto: Piloto
     - sensores: List<Sensores>
+    - observers: List<WeatherObserver>
+    + subscribe(observer: WeatherObserver): void
+    + unsubscribe(observer: WeatherObserver): void
+    + notifyObservers(weather: Weather): void
   }
 
   class Sensores {
@@ -58,9 +62,7 @@ package "Dominio.modelo" as Domain {
   }
 
   interface WeatherObserver {
-    + suscribir(dron: Dron, observador: Consumer<Weather>): boolean
-    + cancelar(dronId: int): boolean
-    + notificar(weather: Weather): void
+    + update(weather: Weather): void
   }
 
   package "Chain" {
@@ -108,21 +110,19 @@ package "Aplicacion" as Application {
     + consultarClima(latitud: double, longitud: double): Weather
   }
 
-  class WeatherNotificationService <<Subject>> {
-    - suscripciones: Map<Integer, Suscripcion>
+  class WeatherNotificationService {
+    - suscripciones: Map<Integer, Map<WeatherObserver, Suscripcion>>
+    + suscribir(dron: Dron, observador: WeatherObserver): boolean
+    + cancelar(dronId: int): boolean
+    + notificar(weather: Weather): void
   }
 
   class Suscripcion <<clase interna>> {
     - dron: Dron
-    - observador: WeatherUpdateObserver
+    - observador: WeatherObserver
   }
 
   package "observer" {
-    interface WeatherUpdateObserver {
-      + update(weather: Weather): void
-      + accept(weather: Weather): void
-    }
-
     class DashboardObserver {
       - refrescarDashboard: Consumer<Weather>
       + update(weather: Weather): void
@@ -153,17 +153,14 @@ Dron "0..*" --> "1" Piloto : piloto
 Dron "1" o-- "0..*" Sensores : sensores
 Dron "1" <-- "0..*" Mision : dron
 
-Dron "1" <-- "0..*" Suscripcion : identificado por
+Dron "1" o-- "0..*" WeatherObserver : observers
 WeatherNotificationService *-- "0..*" Suscripcion
 Suscripcion --> Dron
-Suscripcion --> WeatherUpdateObserver
+Suscripcion --> WeatherObserver
 WeatherNotificationService ..> Weather : publica cinco medidas
-WeatherNotificationService ..|> WeatherObserver
-WeatherObserver ..> Dron : suscribir / cancelar
-WeatherObserver ..> Weather : Consumer de notificación
-WeatherUpdateObserver ..> Weather : recibe actualización
-WeatherUpdateObserver ..|> Consumer
-DashboardObserver ..|> WeatherUpdateObserver
+Dron ..> Weather : notifica
+WeatherObserver ..> Weather : recibe actualización
+DashboardObserver ..|> WeatherObserver
 ClimaServicio ..|> ClimaUseCase
 ClimaServicio --> ProveedorClima
 ClimaServicio --> WeatherNotificationService : publica cada consulta exitosa
@@ -182,15 +179,9 @@ ClimaValidacion --> ClimaValidacion : siguiente
 ClimaValidacion ..> Weather
 
 note right of WeatherNotificationService
-Se suscribe y cancela por ID de dron.
-Cada actualización entrega temperatura,
-humedad, viento, presión y visibilidad.
-end note
-
-note right of WeatherObserver
-Por petición del curso, esta interfaz
-define el contrato del Subject y declara
-exactamente suscribir, cancelar y notificar.
+Registra varios observadores por dron y cancela
+las suscripciones del dron seleccionado.
+Cada actualización distribuye las cinco medidas.
 end note
 
 note right of GeoAPI
@@ -202,8 +193,7 @@ se convierte de metros a kilómetros.
 end note
 
 note bottom of DashboardObserver
-Es el observador concreto implementado actualmente.
-LoggerObserver, ConsoleObserver y FlightStatusObserver
-no existen en el código y no se representan como clases.
+Actualiza los datos y evalúa automáticamente
+la cadena de condiciones de vuelo.
 end note
 @enduml

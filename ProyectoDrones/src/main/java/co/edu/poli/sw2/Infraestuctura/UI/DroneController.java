@@ -15,11 +15,11 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
 import co.edu.poli.sw2.Aplicacion.Servicios.observer.DashboardObserver;
-import co.edu.poli.sw2.Aplicacion.Servicios.observer.WeatherUpdateObserver;
 import co.edu.poli.sw2.Dominio.modelo.Chain.ClimaValidacion;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
 import co.edu.poli.sw2.Dominio.modelo.Sensores;
 import co.edu.poli.sw2.Dominio.modelo.Weather;
+import co.edu.poli.sw2.Dominio.modelo.WeatherObserver;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -35,6 +35,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
+import java.util.logging.Logger;
 
 /**
  * Controlador encargado de gestionar la interfaz gráfica de los drones.
@@ -49,6 +50,8 @@ import javafx.util.StringConverter;
  * @version 1.0
  */
 public class DroneController {
+	private static final Logger LOGGER = Logger.getLogger(DroneController.class.getName());
+
 	@FXML
 	private VBox vistaCrud;
 	@FXML
@@ -376,7 +379,7 @@ public class DroneController {
 		lblViento.setText(String.format(Locale.ROOT, "%.1f km/h", weather.getVelocidadViento()));
 		lblPresion.setText(String.format(Locale.ROOT, "%.1f hPa", weather.getPresion()));
 		lblVisibilidad.setText(String.format(Locale.ROOT, "%.1f km", weather.getVisibilidad()));
-		lblResultadoVuelo.setText("Clima actualizado. Evalúa las condiciones de vuelo.");
+		mostrarResultadoValidacion(weather);
 	}
 
 	private void evaluarClima() {
@@ -384,7 +387,15 @@ public class DroneController {
 			mostrarAlerta(Alert.AlertType.WARNING, "Clima requerido", "Consulta una ubicación antes de evaluar.");
 			return;
 		}
-		lblResultadoVuelo.setText(ClimaValidacion.crearCadena().evaluar(ultimoClima));
+		mostrarResultadoValidacion(ultimoClima);
+	}
+
+	private void mostrarResultadoValidacion(Weather weather) {
+		String resultado = ClimaValidacion.crearCadena().evaluar(weather);
+		lblResultadoVuelo.setText(resultado);
+		if (resultado.startsWith("CLIMA NO APTO")) {
+			LOGGER.warning(resultado);
+		}
 	}
 
 	private void suscribirDron() {
@@ -393,7 +404,7 @@ public class DroneController {
 			mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido", "Selecciona un dron existente.");
 			return;
 		}
-		WeatherUpdateObserver observador = new DashboardObserver(weather -> Platform.runLater(() -> {
+		WeatherObserver observador = new DashboardObserver(weather -> Platform.runLater(() -> {
 			mostrarDatosClima(weather);
 			String mensaje = String.format(Locale.ROOT,
 					"Dron %d recibió clima: %.1f °C, %.0f %%, %.1f km/h, %.1f hPa, %.1f km.",
