@@ -1,22 +1,48 @@
 package co.edu.poli.sw2.Infraestuctura.UI;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.BuscarListaDronesUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CalculaConsumoUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ClimaUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
+import co.edu.poli.sw2.Aplicacion.Servicios.observer.DashboardObserver;
+import co.edu.poli.sw2.Dominio.modelo.Chain.ClimaValidacion;
+import co.edu.poli.sw2.Dominio.modelo.Wather.Weather;
+import co.edu.poli.sw2.Dominio.modelo.Wather.WeatherObserver;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
+import co.edu.poli.sw2.Dominio.modelo.Sensores;
+import co.edu.poli.sw2.Dominio.Strategy.AhorroStrategy;
+import co.edu.poli.sw2.Dominio.Strategy.AltoRendimientoStrategy;
+import co.edu.poli.sw2.Dominio.Strategy.ConsumoStrategy;
+import co.edu.poli.sw2.Dominio.Strategy.NormalStrategy;
+import co.edu.poli.sw2.Dominio.Strategy.PuntoGeografico;
+import co.edu.poli.sw2.Infraestuctura.Persistencia.GeoAPI;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
+import java.util.logging.Logger;
 
 /**
  * Controlador encargado de gestionar la interfaz gráfica de los drones.
@@ -31,6 +57,64 @@ import javafx.scene.control.TextField;
  * @version 1.0
  */
 public class DroneController {
+	private static final Logger LOGGER = Logger.getLogger(DroneController.class.getName());
+
+	@FXML
+	private VBox vistaCrud;
+	@FXML
+	private VBox vistaClima;
+	@FXML
+	private VBox vistaConsumo;
+	@FXML
+	private Button btnIrClima;
+	@FXML
+	private Button btnIrConsumo;
+	@FXML
+	private Button btnVolverCrud;
+	@FXML
+	private Button btnVolverConsumo;
+	@FXML
+	private Button btnCalcularConsumo;
+	@FXML
+	private ComboBox<Dron> cmbDronesConsumo;
+	@FXML
+	private ComboBox<String> cmbEstrategiaConsumo;
+	@FXML
+	private Label lblRutaConsumo;
+	@FXML
+	private Label lblDistanciaConsumo;
+	@FXML
+	private Label lblEstrategiaConsumo;
+	@FXML
+	private Label lblBateriaConsumo;
+	@FXML
+	private Button btnConsultarClima;
+	@FXML
+	private Button btnEvaluarClima;
+	@FXML
+	private Button btnSuscribir;
+	@FXML
+	private Button btnCancelarSuscripcion;
+	@FXML
+	private TextField txtCiudad;
+	@FXML
+	private ComboBox<String> cmbCiudades;
+	@FXML
+	private ComboBox<Dron> cmbDronesClima;
+	@FXML
+	private Label lblTemperatura;
+	@FXML
+	private Label lblHumedad;
+	@FXML
+	private Label lblViento;
+	@FXML
+	private Label lblPresion;
+	@FXML
+	private Label lblVisibilidad;
+	@FXML
+	private Label lblResultadoVuelo;
+	@FXML
+	private ListView<String> listaActualizaciones;
 
 	/**
 	 * Botón utilizado para crear un nuevo dron.
@@ -96,7 +180,7 @@ public class DroneController {
 	@FXML
 	private TableColumn<Dron, String> colPiloto;
 
-	/** Columna con el ID del sensor asociado. */
+	/** Columna con los IDs de los sensores asociados. */
 	@FXML
 	private TableColumn<Dron, String> colSensor;
 
@@ -137,7 +221,7 @@ public class DroneController {
 	private TextField txtPiloto;
 
 	/**
-	 * Campo de texto utilizado para ingresar el identificador del sensor.
+	 * Campo de texto para ingresar uno o más IDs de sensor, separados por comas.
 	 */
 	@FXML
 	private TextField txtSensor;
@@ -152,6 +236,10 @@ public class DroneController {
 	private final EditarDronUseCase editarDronUseCase;
 	/** Caso de uso para eliminar un dron. */
 	private final EliminarDronUseCase eliminarDronUseCase;
+	private final ClimaUseCase climaUseCase;
+	private final WeatherNotificationService notificadorClima;
+	private Map<String, double[]> ubicaciones = new LinkedHashMap<>();
+	private Weather ultimoClima;
 
 	/**
 	 * Construye el adaptador de interfaz con los casos de uso requeridos.
@@ -165,11 +253,28 @@ public class DroneController {
 	public DroneController(CrearDronUseCase crearDronUseCase, BuscarDronUseCase buscarDronUseCase,
 			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
 			EliminarDronUseCase eliminarDronUseCase) {
+		this(crearDronUseCase, buscarDronUseCase, buscarListaDronesUseCase, editarDronUseCase,
+				eliminarDronUseCase, null, null);
+	}
+
+	public DroneController(CrearDronUseCase crearDronUseCase, BuscarDronUseCase buscarDronUseCase,
+			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
+			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase) {
+		this(crearDronUseCase, buscarDronUseCase, buscarListaDronesUseCase, editarDronUseCase,
+				eliminarDronUseCase, climaUseCase, null);
+	}
+
+	public DroneController(CrearDronUseCase crearDronUseCase, BuscarDronUseCase buscarDronUseCase,
+			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
+			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase,
+			WeatherNotificationService notificadorClima) {
 		this.crearDronUseCase = crearDronUseCase;
 		this.buscarDronUseCase = buscarDronUseCase;
 		this.buscarListaDronesUseCase = buscarListaDronesUseCase;
 		this.editarDronUseCase = editarDronUseCase;
 		this.eliminarDronUseCase = eliminarDronUseCase;
+		this.climaUseCase = climaUseCase;
+		this.notificadorClima = notificadorClima;
 	}
 
 	/**
@@ -198,11 +303,235 @@ public class DroneController {
 		btnEliminar.setOnAction(e -> eliminar());
 		btnActualizar.setOnAction(e -> actualizar());
 		btnListar.setOnAction(e -> listar());
+		btnIrClima.setOnAction(e -> mostrarVistaClima());
+		btnIrConsumo.setOnAction(e -> mostrarVistaConsumo());
+		btnVolverCrud.setOnAction(e -> mostrarVistaCrud());
+		btnVolverConsumo.setOnAction(e -> mostrarVistaCrud());
+		btnCalcularConsumo.setOnAction(e -> calcularConsumo());
+		txtCiudad.setOnAction(e -> buscarCiudades());
+		btnConsultarClima.setOnAction(e -> consultarClima());
+		btnEvaluarClima.setOnAction(e -> evaluarClima());
+		btnSuscribir.setOnAction(e -> suscribirDron());
+		btnCancelarSuscripcion.setOnAction(e -> cancelarSuscripcion());
+		cmbDronesClima.setConverter(new StringConverter<Dron>() {
+			@Override
+			public String toString(Dron dron) {
+				return dron == null ? "" : "Dron " + dron.getId() + " · " + dron.getModelo();
+			}
+
+			@Override
+			public Dron fromString(String valor) {
+				return null;
+			}
+		});
+		cmbDronesConsumo.setConverter(new StringConverter<Dron>() {
+			@Override
+			public String toString(Dron dron) {
+				return dron == null ? "" : "Dron " + dron.getId() + " · " + dron.getModelo();
+			}
+
+			@Override
+			public Dron fromString(String valor) {
+				return null;
+			}
+		});
+		cmbEstrategiaConsumo.setItems(FXCollections.observableArrayList(
+				"Ahorro", "Normal", "Alto rendimiento"));
 		tablaDrones.getSelectionModel().selectedItemProperty().addListener((observable, anterior, seleccionado) -> {
 			if (seleccionado != null) {
 				cargarFormulario(seleccionado);
 			}
 		});
+	}
+
+	private void mostrarVistaClima() {
+		vistaCrud.setVisible(false);
+		vistaCrud.setManaged(false);
+		vistaConsumo.setVisible(false);
+		vistaConsumo.setManaged(false);
+		vistaClima.setVisible(true);
+		vistaClima.setManaged(true);
+		if (climaUseCase == null || notificadorClima == null) {
+			mostrarAlerta(Alert.AlertType.ERROR, "Clima no configurado", "El servicio meteorológico no está disponible.");
+			return;
+		}
+		try {
+			cmbDronesClima.setItems(FXCollections.observableArrayList(buscarListaDronesUseCase.buscarTodos()));
+		} catch (RuntimeException exception) {
+			mostrarAlerta(Alert.AlertType.ERROR, "Error de Base de Datos",
+					"No se pudieron cargar los drones: " + exception.getMessage());
+		}
+	}
+
+	private void mostrarVistaCrud() {
+		vistaClima.setVisible(false);
+		vistaClima.setManaged(false);
+		vistaConsumo.setVisible(false);
+		vistaConsumo.setManaged(false);
+		vistaCrud.setVisible(true);
+		vistaCrud.setManaged(true);
+	}
+
+	private void mostrarVistaConsumo() {
+		vistaCrud.setVisible(false);
+		vistaCrud.setManaged(false);
+		vistaClima.setVisible(false);
+		vistaClima.setManaged(false);
+		vistaConsumo.setVisible(true);
+		vistaConsumo.setManaged(true);
+		try {
+			cmbDronesConsumo.setItems(FXCollections.observableArrayList(buscarListaDronesUseCase.buscarTodos()));
+			if (cmbEstrategiaConsumo.getValue() == null) {
+				cmbEstrategiaConsumo.getSelectionModel().selectFirst();
+			}
+			PuntoGeografico[] ruta = new GeoAPI().cargarRutaDesdeJson();
+			lblRutaConsumo.setText(ruta[0].nombre + " → " + ruta[1].nombre);
+		} catch (RuntimeException exception) {
+			mostrarAlerta(Alert.AlertType.ERROR, "No se pudo cargar el cálculo",
+					"Verifica la conexión de base de datos y el archivo JSON de ruta: " + exception.getMessage());
+		}
+	}
+
+	private void calcularConsumo() {
+		Dron dron = cmbDronesConsumo.getValue();
+		String estrategiaSeleccionada = cmbEstrategiaConsumo.getValue();
+		if (dron == null || estrategiaSeleccionada == null) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Datos requeridos",
+					"Selecciona un dron y una estrategia de consumo.");
+			return;
+		}
+
+		ConsumoStrategy estrategia;
+		switch (estrategiaSeleccionada) {
+		case "Ahorro":
+			estrategia = new AhorroStrategy();
+			break;
+		case "Normal":
+			estrategia = new NormalStrategy();
+			break;
+		case "Alto rendimiento":
+			estrategia = new AltoRendimientoStrategy();
+			break;
+		default:
+			throw new IllegalStateException("Estrategia de consumo no reconocida: " + estrategiaSeleccionada);
+		}
+
+		try {
+			PuntoGeografico[] ruta = new GeoAPI().cargarRutaDesdeJson();
+			CalculaConsumoUseCase calculador = new CalculaConsumoUseCase(
+					estrategia, "Dron " + dron.getId() + " · " + dron.getModelo());
+			calculador.ejecutar(ruta[0], ruta[1]);
+			lblRutaConsumo.setText(ruta[0].nombre + " → " + ruta[1].nombre);
+			lblDistanciaConsumo.setText(String.format(Locale.ROOT, "%.2f km", calculador.getDistanciaKm()));
+			lblEstrategiaConsumo.setText(calculador.getEstrategia().getNombreEstrategia());
+			lblBateriaConsumo.setText(String.format(Locale.ROOT, "%.2f unidades", calculador.getBateriaRequerida()));
+		} catch (RuntimeException exception) {
+			mostrarAlerta(Alert.AlertType.ERROR, "Error al calcular consumo",
+					"No se pudo calcular el consumo del recorrido: " + exception.getMessage());
+		}
+	}
+
+	private void buscarCiudades() {
+		String consulta = txtCiudad.getText().trim();
+		if (consulta.length() < 2) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Búsqueda incompleta", "Escribe al menos dos caracteres.");
+			return;
+		}
+		Task<Map<String, double[]>> tarea = new Task<Map<String, double[]>>() {
+			@Override
+			protected Map<String, double[]> call() {
+				return climaUseCase.buscarCiudades(consulta);
+			}
+		};
+		tarea.setOnSucceeded(event -> {
+			ubicaciones = tarea.getValue();
+			cmbCiudades.setItems(FXCollections.observableArrayList(ubicaciones.keySet()));
+			if (!ubicaciones.isEmpty()) {
+				cmbCiudades.getSelectionModel().selectFirst();
+			} else {
+				mostrarAlerta(Alert.AlertType.INFORMATION, "Sin resultados", "No se encontraron ciudades.");
+			}
+		});
+		tarea.setOnFailed(event -> mostrarAlerta(Alert.AlertType.ERROR, "Error meteorológico",
+				"No se pudieron buscar ciudades: " + tarea.getException().getMessage()));
+		new Thread(tarea, "open-meteo-geocoding").start();
+	}
+
+	private void consultarClima() {
+		String ubicacion = cmbCiudades.getValue();
+		double[] coordenadas = ubicacion == null ? null : ubicaciones.get(ubicacion);
+		if (coordenadas == null) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Ubicación requerida", "Busca y selecciona una ciudad.");
+			return;
+		}
+		Task<Weather> tarea = new Task<Weather>() {
+			@Override
+			protected Weather call() {
+				return climaUseCase.consultarClima(coordenadas[0], coordenadas[1]);
+			}
+		};
+		tarea.setOnSucceeded(event -> {
+			ultimoClima = tarea.getValue();
+			mostrarDatosClima(ultimoClima);
+		});
+		tarea.setOnFailed(event -> mostrarAlerta(Alert.AlertType.ERROR, "Error meteorológico",
+				"No se pudo consultar el clima: " + tarea.getException().getMessage()));
+		new Thread(tarea, "open-meteo-current-weather").start();
+	}
+
+	private void mostrarDatosClima(Weather weather) {
+		lblTemperatura.setText(String.format(Locale.ROOT, "%.1f °C", weather.getTemperatura()));
+		lblHumedad.setText(String.format(Locale.ROOT, "%.0f %%", weather.getHumedad()));
+		lblViento.setText(String.format(Locale.ROOT, "%.1f km/h", weather.getVelocidadViento()));
+		lblPresion.setText(String.format(Locale.ROOT, "%.1f hPa", weather.getPresion()));
+		lblVisibilidad.setText(String.format(Locale.ROOT, "%.1f km", weather.getVisibilidad()));
+		mostrarResultadoValidacion(weather);
+	}
+
+	private void evaluarClima() {
+		if (ultimoClima == null) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Clima requerido", "Consulta una ubicación antes de evaluar.");
+			return;
+		}
+		mostrarResultadoValidacion(ultimoClima);
+	}
+
+	private void mostrarResultadoValidacion(Weather weather) {
+		String resultado = ClimaValidacion.crearCadena().evaluar(weather);
+		lblResultadoVuelo.setText(resultado);
+		if (resultado.startsWith("CLIMA NO APTO")) {
+			LOGGER.warning(resultado);
+		}
+	}
+
+	private void suscribirDron() {
+		Dron dron = cmbDronesClima.getValue();
+		if (dron == null) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido", "Selecciona un dron existente.");
+			return;
+		}
+		WeatherObserver observador = new DashboardObserver(weather -> Platform.runLater(() -> {
+			mostrarDatosClima(weather);
+			String mensaje = String.format(Locale.ROOT,
+					"Dron %d recibió clima: %.1f °C, %.0f %%, %.1f km/h, %.1f hPa, %.1f km.",
+					dron.getId(), weather.getTemperatura(), weather.getHumedad(), weather.getVelocidadViento(),
+					weather.getPresion(), weather.getVisibilidad());
+			listaActualizaciones.getItems().add(mensaje);
+		}));
+		if (notificadorClima.suscribir(dron, observador)) {
+			listaActualizaciones.getItems().add("Suscripción activa: dron " + dron.getId() + ".");
+		} else {
+			listaActualizaciones.getItems().add("El dron " + dron.getId() + " ya estaba suscrito.");
+		}
+	}
+
+	private void cancelarSuscripcion() {
+		Dron dron = cmbDronesClima.getValue();
+		if (dron == null || !notificadorClima.cancelar(dron.getId())) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Sin suscripción", "Selecciona un dron suscrito.");
+			return;
+		}
+		listaActualizaciones.getItems().add("Suscripción cancelada: dron " + dron.getId() + ".");
 	}
 
 	/** Asocia cada columna de la tabla con su propiedad del modelo de dominio. */
@@ -215,7 +544,7 @@ public class DroneController {
 		colPiloto.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
 				celda.getValue().getPiloto() == null ? "-" : String.valueOf(celda.getValue().getPiloto().getId())));
 		colSensor.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
-				celda.getValue().getSensores() == null ? "-" : String.valueOf(celda.getValue().getSensores().getId())));
+				formatearSensorIds(celda.getValue().getSensores())));
 	}
 
 	/** Carga el inventario completo y presenta el resultado en la tabla. */
@@ -253,8 +582,30 @@ public class DroneController {
 		txtFabricante.setText(dron.getFabricante());
 		txtPeso.setText(String.valueOf(dron.getPeso()));
 		txtPiloto.setText(dron.getPiloto() == null ? "" : String.valueOf(dron.getPiloto().getId()));
-		txtSensor.setText(dron.getSensores() == null ? "" : String.valueOf(dron.getSensores().getId()));
+		List<Sensores> sensores = dron.getSensores();
+		txtSensor.setText(sensores.isEmpty() ? "" : formatearSensorIds(sensores));
 		lblEstado.setText("Dron " + dron.getId() + " cargado en la ficha.");
+	}
+
+	private String formatearSensorIds(List<Sensores> sensores) {
+		if (sensores.isEmpty()) {
+			return "-";
+		}
+		return sensores.stream()
+				.map(sensor -> String.valueOf(sensor.getId()))
+				.collect(Collectors.joining(", "));
+	}
+
+	private List<Integer> leerSensorIds() {
+		List<Integer> sensorIds = new ArrayList<>();
+		for (String sensorId : txtSensor.getText().split(",", -1)) {
+			int id = Integer.parseInt(sensorId.trim());
+			if (id <= 0) {
+				throw new NumberFormatException("Los IDs de sensor deben ser positivos.");
+			}
+			sensorIds.add(id);
+		}
+		return sensorIds;
 	}
 
 	/**
@@ -290,7 +641,7 @@ public class DroneController {
 	 *
 	 * <p>
 	 * Valida que todos los campos requeridos estén diligenciados, obtiene los
-	 * identificadores del piloto y del sensor y registra el dron junto con sus
+	 * identificadores del piloto y de los sensores y registra el dron junto con sus
 	 * asociaciones correspondientes.
 	 * </p>
 	 *
@@ -315,7 +666,7 @@ public class DroneController {
 
 			// Obtener los identificadores
 			int pilotoId = Integer.parseInt(txtPiloto.getText());
-			int sensorId = Integer.parseInt(txtSensor.getText());
+			List<Integer> sensorIds = leerSensorIds();
 
 			// Crear objeto Dron
 			Dron drone = new Dron();
@@ -325,19 +676,21 @@ public class DroneController {
 			drone.setFabricante(txtFabricante.getText());
 			drone.setPeso(Integer.parseInt(txtPeso.getText()));
 
-			// Guardar el dron y obtener el ID generado
-			int idGenerado = crearDronUseCase.crear(drone, pilotoId, sensorId);
-
+			int idGenerado = crearDronUseCase.crear(
+			    drone,
+			    pilotoId,
+			    sensorIds
+			);
 			limpiarCampos();
 			txtId.setText(String.valueOf(idGenerado));
 			refrescarTabla();
 			mostrarAlerta(Alert.AlertType.INFORMATION, "Dron guardado",
 					"Registro creado con ID " + idGenerado + ".");
 
-		} catch (NumberFormatException e) {
+		} catch (IllegalArgumentException e) {
 
 			mostrarAlerta(Alert.AlertType.ERROR, "Datos inválidos",
-					"Peso, piloto y sensor deben ser valores numéricos.");
+					"Revise peso, piloto y los IDs de sensor: " + e.getMessage());
 
 		} catch (RuntimeException e) {
 
@@ -351,7 +704,7 @@ public class DroneController {
 	 *
 	 * <p>
 	 * Si el dron existe, se muestran sus datos en los campos correspondientes,
-	 * incluyendo el identificador del piloto y del sensor asociados.
+	 * incluyendo el identificador del piloto y todos los IDs de sensores asociados.
 	 * </p>
 	 *
 	 */
@@ -414,6 +767,10 @@ public class DroneController {
 			int id = Integer.parseInt(txtId.getText());
 
 			if (eliminarDronUseCase.eliminar(id)) {
+				if (notificadorClima != null && notificadorClima.cancelar(id)) {
+					listaActualizaciones.getItems()
+							.add("Suscripción cancelada automáticamente: dron " + id + " eliminado.");
+				}
 				limpiarCampos();
 				refrescarTabla();
 				mostrarAlerta(Alert.AlertType.INFORMATION, "Dron eliminado", "El registro fue eliminado.");
@@ -437,7 +794,7 @@ public class DroneController {
 	 *
 	 * <p>
 	 * Valida los datos ingresados, actualiza la información básica del dron y
-	 * actualiza las asociaciones correspondientes con el piloto y el sensor.
+	 * actualiza las asociaciones correspondientes con el piloto y los sensores.
 	 * </p>
 	 *
 	 */
@@ -467,7 +824,7 @@ public class DroneController {
 			int id = Integer.parseInt(txtId.getText());
 			int peso = Integer.parseInt(txtPeso.getText());
 			int pilotoId = Integer.parseInt(txtPiloto.getText());
-			int sensorId = Integer.parseInt(txtSensor.getText());
+			List<Integer> sensorIds = leerSensorIds();
 
 			// Crear objeto Dron
 			Dron drone = new Dron();
@@ -478,19 +835,29 @@ public class DroneController {
 			drone.setFabricante(txtFabricante.getText());
 			drone.setPeso(peso);
 
-			// Actualizar dron, piloto y sensor
-			if (editarDronUseCase.actualizar(drone, pilotoId, sensorId)) {
-				refrescarTabla();
-				mostrarAlerta(Alert.AlertType.INFORMATION, "Dron actualizado",
-						"Los cambios se guardaron correctamente.");
+			if (editarDronUseCase.actualizar(drone, pilotoId, sensorIds)) {
+
+			    refrescarTabla();
+
+			    mostrarAlerta(
+			        Alert.AlertType.INFORMATION,
+			        "Dron actualizado",
+			        "Los cambios se guardaron correctamente."
+			    );
+
 			} else {
-				mostrarAlerta(Alert.AlertType.WARNING, "Dron no encontrado", "No existe un dron con el ID ingresado.");
+
+			    mostrarAlerta(
+			        Alert.AlertType.WARNING,
+			        "Dron no encontrado",
+			        "No existe un dron con el ID ingresado."
+			    );
 			}
 
-		} catch (NumberFormatException e) {
+		} catch (IllegalArgumentException e) {
 
 			mostrarAlerta(Alert.AlertType.ERROR, "Datos inválidos",
-					"ID, peso, piloto y sensor deben contener valores numéricos.");
+					"Revise ID, peso, piloto y los IDs de sensor: " + e.getMessage());
 
 		} catch (RuntimeException e) {
 
@@ -525,5 +892,11 @@ public class DroneController {
 				: tipo == Alert.AlertType.WARNING ? "#f4cf83" : "#81e4d0";
 		lblEstado.setText(titulo + " · " + mensaje);
 		lblEstado.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 13px;");
+
+		Alert alerta = new Alert(tipo);
+		alerta.setTitle(titulo);
+		alerta.setHeaderText(titulo);
+		alerta.setContentText(mensaje);
+		alerta.showAndWait();
 	}
 }

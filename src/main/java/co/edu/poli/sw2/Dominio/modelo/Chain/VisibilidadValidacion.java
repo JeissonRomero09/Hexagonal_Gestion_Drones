@@ -1,0 +1,11 @@
+package co.edu.poli.sw2.Dominio.modelo.Chain;
+
+import co.edu.poli.sw2.Dominio.modelo.Wather.Weather;
+
+/** Rechaza visibilidad inferior a 5 km. */
+public class VisibilidadValidacion extends ClimaValidacion {
+	@Override
+	protected String validarRegla(Weather weather) {
+		return weather.getVisibilidad() < 5 ? "Visibilidad inferior a 5 km." : null;
+	}
+}

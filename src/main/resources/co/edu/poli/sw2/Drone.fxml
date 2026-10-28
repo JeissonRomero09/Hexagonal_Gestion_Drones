@@ -2,7 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -13,92 +15,179 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane minHeight="650.0" minWidth="1000.0" prefHeight="720.0" prefWidth="1280.0"
-		xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-		fx:controller="co.edu.poli.sw2.Infraestuctura.UI.DroneController">
+<AnchorPane minHeight="650.0" minWidth="1000.0" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.poli.sw2.Infraestuctura.UI.DroneController">
 	<children>
-		<ImageView fitHeight="720.0" fitWidth="1280.0" preserveRatio="false" smooth="true"
-				AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<ImageView fitHeight="720.0" fitWidth="1280.0" preserveRatio="false" smooth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<image><Image url="@images/Fondo_.jpg" /></image>
 		</ImageView>
 		<Rectangle fill="#07101dcc" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-		<VBox spacing="18.0" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+		<VBox fx:id="vistaCrud" spacing="18.0" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
 			<padding><Insets bottom="2.0" left="2.0" right="2.0" top="2.0" /></padding>
 			<children>
-				<HBox alignment="CENTER_LEFT" spacing="18.0" minHeight="74.0">
+				<HBox alignment="CENTER_LEFT" minHeight="74.0" spacing="18.0">
 					<children>
 						<VBox spacing="3.0"><children>
-							<Label text="OPERACIONES / FLOTA AÉREA" style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" />
-							<Label text="Gestión de drones" style="-fx-text-fill: white; -fx-font-size: 29px; -fx-font-weight: bold;" />
+							<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="OPERACIONES / FLOTA AÉREA" />
+							<Label style="-fx-text-fill: white; -fx-font-size: 29px; -fx-font-weight: bold;" text="Gestión de drones" />
 						</children></VBox>
 						<Region HBox.hgrow="ALWAYS" />
-						<Label fx:id="lblEstado" text="Listo para gestionar la flota" wrapText="true" maxWidth="390.0" alignment="CENTER_RIGHT" style="-fx-text-fill: #e7f1f3; -fx-font-size: 13px;" />
+						<Button fx:id="btnIrClima" minWidth="120.0" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Clima" />
+						<Button fx:id="btnIrConsumo" minWidth="120.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Consumo" />
+						<Label fx:id="lblEstado" alignment="CENTER_RIGHT" maxWidth="390.0" style="-fx-text-fill: #e7f1f3; -fx-font-size: 13px;" text="Listo para gestionar la flota" wrapText="true" />
 					</children>
 				</HBox>
 				<HBox spacing="16.0" VBox.vgrow="ALWAYS">
 					<children>
-						<VBox minWidth="340.0" prefWidth="390.0" maxWidth="430.0" spacing="15.0" style="-fx-background-color: rgba(7,19,31,0.91); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;">
+						<VBox maxWidth="430.0" minWidth="340.0" prefWidth="390.0" spacing="15.0" style="-fx-background-color: rgba(7,19,31,0.91); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;">
 							<padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
 							<children>
 								<VBox spacing="4.0"><children>
-									<Label text="FICHA DEL DRON" style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" />
-									<Label text="Datos y acciones" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+									<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="FICHA DEL DRON" />
+									<Label style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" text="Datos y acciones" />
 								</children></VBox>
 								<VBox spacing="6.0"><children>
-									<Label text="ID para buscar, editar o eliminar" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" />
+									<Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="ID para buscar, editar o eliminar" />
 									<HBox spacing="8.0"><children>
-										<TextField fx:id="txtId" promptText="Ej. 12" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6; -fx-font-size: 14px;" />
-										<Button fx:id="btnBuscar" text="Buscar ID" minWidth="94.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
+										<TextField fx:id="txtId" promptText="Ej. 12" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
+										<Button fx:id="btnBuscar" minWidth="94.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Buscar ID" />
 									</children></HBox>
 								</children></VBox>
 								<GridPane hgap="12.0" vgap="12.0">
 									<columnConstraints><ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" /></columnConstraints>
 									<children>
-										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="0"><children><Label text="Serial" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtSerial" promptText="Número de serie" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
-										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0"><children><Label text="Modelo" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtModelo" promptText="Modelo" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
-										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1"><children><Label text="Fabricante" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtFabricante" promptText="Fabricante" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
-										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1"><children><Label text="Peso (kg)" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtPeso" promptText="Peso entero" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
-										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="2"><children><Label text="ID del piloto" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtPiloto" promptText="ID piloto" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
-										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2"><children><Label text="ID del sensor" style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" /><TextField fx:id="txtSensor" promptText="ID sensor" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="0"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Serial" /><TextField fx:id="txtSerial" promptText="Número de serie" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Modelo" /><TextField fx:id="txtModelo" promptText="Modelo" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Fabricante" /><TextField fx:id="txtFabricante" promptText="Fabricante" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Peso (kg)" /><TextField fx:id="txtPeso" promptText="Peso entero" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="2"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="ID del piloto" /><TextField fx:id="txtPiloto" promptText="ID piloto" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+										<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="IDs de sensores (separados por coma)" /><TextField fx:id="txtSensor" promptText="Ej. 1, 2, 3" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
 									</children>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                           </rowConstraints>
 								</GridPane>
 								<Region VBox.vgrow="ALWAYS" />
-								<Label text="Crear guarda un registro nuevo. Para editar, busca o selecciona un dron de la tabla." wrapText="true" style="-fx-text-fill: #aebfc5; -fx-font-size: 11px;" />
+								<Label style="-fx-text-fill: #aebfc5; -fx-font-size: 11px;" text="Crear guarda un registro nuevo. Para editar, busca o selecciona un dron de la tabla." wrapText="true" />
 								<HBox spacing="8.0"><children>
-									<Button fx:id="btnCrear" text="Crear" HBox.hgrow="ALWAYS" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
-									<Button fx:id="btnActualizar" text="Editar" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
-									<Button fx:id="btnEliminar" text="Eliminar" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" />
+									<Button fx:id="btnCrear" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Crear" HBox.hgrow="ALWAYS" />
+									<Button fx:id="btnActualizar" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Editar" HBox.hgrow="ALWAYS" />
+									<Button fx:id="btnEliminar" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" text="Eliminar" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="btnCrear1" prefHeight="25.0" prefWidth="71.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
+                              <Button fx:id="btnCrear2" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
 								</children></HBox>
 							</children>
 						</VBox>
-						<VBox spacing="12.0" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(248,251,252,0.96); -fx-background-radius: 12;">
+						<VBox spacing="12.0" style="-fx-background-color: rgba(248,251,252,0.96); -fx-background-radius: 12;" HBox.hgrow="ALWAYS">
 							<padding><Insets bottom="18.0" left="18.0" right="18.0" top="18.0" /></padding>
 							<children>
 								<HBox alignment="CENTER_LEFT" spacing="12.0"><children>
-									<VBox spacing="3.0"><children><Label text="Inventario" style="-fx-text-fill: #142934; -fx-font-size: 21px; -fx-font-weight: bold;" /><Label fx:id="lblConteo" text="Sin cargar" style="-fx-text-fill: #60747d; -fx-font-size: 12px;" /></children></VBox>
+									<VBox spacing="3.0"><children><Label style="-fx-text-fill: #142934; -fx-font-size: 21px; -fx-font-weight: bold;" text="Inventario" /><Label fx:id="lblConteo" style="-fx-text-fill: #60747d; -fx-font-size: 12px;" text="Sin cargar" /></children></VBox>
 									<Region HBox.hgrow="ALWAYS" />
-									<Button fx:id="btnListar" text="Mostrar todos" minWidth="112.0" style="-fx-background-color: #142934; -fx-background-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
+									<Button fx:id="btnListar" minWidth="112.0" style="-fx-background-color: #142934; -fx-background-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Mostrar todos" />
 								</children></HBox>
-								<TableView fx:id="tablaDrones" VBox.vgrow="ALWAYS" minHeight="300.0" style="-fx-background-color: transparent; -fx-background-radius: 6; -fx-border-color: #d9e2e5; -fx-border-radius: 6;">
-									<placeholder><Label text="No hay drones para mostrar" style="-fx-text-fill: #71848c;" /></placeholder>
+								<TableView fx:id="tablaDrones" minHeight="300.0" style="-fx-background-color: transparent; -fx-background-radius: 6; -fx-border-color: #d9e2e5; -fx-border-radius: 6;" VBox.vgrow="ALWAYS">
+									<placeholder><Label style="-fx-text-fill: #71848c;" text="No hay drones para mostrar" /></placeholder>
 									<columns>
-										<TableColumn fx:id="colId" text="ID" prefWidth="48.0" />
-										<TableColumn fx:id="colSerial" text="Serial" prefWidth="112.0" />
-										<TableColumn fx:id="colModelo" text="Modelo" prefWidth="105.0" />
-										<TableColumn fx:id="colFabricante" text="Fabricante" prefWidth="112.0" />
-										<TableColumn fx:id="colPeso" text="Kg" prefWidth="48.0" />
-										<TableColumn fx:id="colPiloto" text="Piloto" prefWidth="66.0" />
-										<TableColumn fx:id="colSensor" text="Sensor" prefWidth="66.0" />
+										<TableColumn fx:id="colId" prefWidth="48.0" text="ID" />
+										<TableColumn fx:id="colSerial" prefWidth="112.0" text="Serial" />
+										<TableColumn fx:id="colModelo" prefWidth="105.0" text="Modelo" />
+										<TableColumn fx:id="colFabricante" prefWidth="112.0" text="Fabricante" />
+										<TableColumn fx:id="colPeso" prefWidth="48.0" text="Kg" />
+										<TableColumn fx:id="colPiloto" prefWidth="66.0" text="Piloto" />
+										<TableColumn fx:id="colSensor" prefWidth="90.0" text="Sensores" />
 								</columns>
 								</TableView>
-								<Label text="Selecciona una fila para cargar sus datos en la ficha." style="-fx-text-fill: #60747d; -fx-font-size: 11px;" />
+								<Label style="-fx-text-fill: #60747d; -fx-font-size: 11px;" text="Selecciona una fila para cargar sus datos en la ficha." />
 							</children>
 						</VBox>
 					</children>
 				</HBox>
+			</children>
+		</VBox>
+		<VBox fx:id="vistaClima" managed="false" spacing="18.0" style="-fx-background-color: rgba(7,19,31,0.96); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;" visible="false" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+			<padding><Insets bottom="22.0" left="24.0" right="24.0" top="22.0" /></padding>
+			<children>
+				<HBox alignment="CENTER_LEFT" spacing="16.0"><children>
+					<VBox spacing="3.0"><children>
+						<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="CONDICIONES METEOROLÓGICAS" />
+						<Label style="-fx-text-fill: white; -fx-font-size: 25px; -fx-font-weight: bold;" text="Evaluación de vuelo" />
+					</children></VBox>
+					<Region HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnVolverCrud" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Volver a la flota" />
+				</children></HBox>
+				<VBox spacing="8.0"><children>
+					<Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Buscar una ciudad" />
+					<HBox spacing="10.0"><children>
+						<TextField fx:id="txtCiudad" promptText="Ciudad; pulsa Enter para buscar" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6; -fx-font-size: 14px;" HBox.hgrow="ALWAYS" />
+					</children></HBox>
+					<HBox alignment="CENTER_LEFT" spacing="10.0"><children>
+						<ComboBox fx:id="cmbCiudades" promptText="Selecciona una ubicación" prefWidth="520.0" HBox.hgrow="ALWAYS" />
+						<Button fx:id="btnConsultarClima" minWidth="160.0" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Consultar clima actual" />
+					</children></HBox>
+				</children></VBox>
+				<GridPane hgap="12.0" vgap="12.0">
+					<columnConstraints><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="20.0" /></columnConstraints>
+					<children>
+						<VBox spacing="6.0" GridPane.columnIndex="0"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="TEMPERATURA" /><Label fx:id="lblTemperatura" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- °C" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="1"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="HUMEDAD" /><Label fx:id="lblHumedad" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- %" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="2"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="VIENTO" /><Label fx:id="lblViento" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- km/h" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="3"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="PRESIÓN" /><Label fx:id="lblPresion" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- hPa" /></children></VBox>
+						<VBox spacing="6.0" GridPane.columnIndex="4"><children><Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="VISIBILIDAD" /><Label fx:id="lblVisibilidad" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- km" /></children></VBox>
+					</children>
+				</GridPane>
+				<HBox alignment="CENTER_LEFT" spacing="14.0"><children>
+					<Button fx:id="btnEvaluarClima" minWidth="165.0" style="-fx-background-color: #f2c879; -fx-background-radius: 6; -fx-text-fill: #302515; -fx-font-weight: bold; -fx-cursor: hand;" text="Evaluar vuelo" />
+					<Label fx:id="lblResultadoVuelo" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Consulta el clima para evaluar" wrapText="true" HBox.hgrow="ALWAYS" />
+				</children></HBox>
+				<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="OBSERVADORES DE FLOTA" />
+				<HBox alignment="CENTER_LEFT" spacing="10.0"><children>
+					<ComboBox fx:id="cmbDronesClima" promptText="Selecciona un dron existente" prefWidth="370.0" HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnSuscribir" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Suscribir" />
+					<Button fx:id="btnCancelarSuscripcion" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" text="Cancelar suscripción" />
+				</children></HBox>
+				<ListView fx:id="listaActualizaciones" minHeight="150.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" VBox.vgrow="ALWAYS" />
+			</children>
+		</VBox>
+		<VBox fx:id="vistaConsumo" managed="false" visible="false" spacing="22.0" style="-fx-background-color: rgba(7,19,31,0.96); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+			<padding><Insets bottom="28.0" left="30.0" right="30.0" top="26.0" /></padding>
+			<children>
+				<HBox alignment="CENTER_LEFT" spacing="16.0"><children>
+					<VBox spacing="4.0"><children>
+						<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="PATRÓN STRATEGY" />
+						<Label style="-fx-text-fill: white; -fx-font-size: 25px; -fx-font-weight: bold;" text="Estimación de consumo energético" />
+					</children></VBox>
+					<Region HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnVolverConsumo" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Volver a la flota" />
+				</children></HBox>
+				<Label style="-fx-text-fill: #cad8dd; -fx-font-size: 14px;" text="Selecciona un dron y el perfil de vuelo. Los puntos de la ruta se cargan desde ruta-consumo.json." wrapText="true" />
+				<HBox alignment="CENTER_LEFT" spacing="12.0"><children>
+					<ComboBox fx:id="cmbDronesConsumo" prefWidth="360.0" promptText="Selecciona un dron" HBox.hgrow="ALWAYS" />
+					<ComboBox fx:id="cmbEstrategiaConsumo" prefWidth="250.0" promptText="Selecciona una estrategia" />
+					<Button fx:id="btnCalcularConsumo" minWidth="180.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Calcular consumo" />
+				</children></HBox>
+				<VBox spacing="14.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 10;">
+					<padding><Insets bottom="24.0" left="24.0" right="24.0" top="24.0" /></padding>
+					<children>
+						<Label style="-fx-text-fill: #60747d; -fx-font-size: 12px; -fx-font-weight: bold;" text="RUTA" />
+						<Label fx:id="lblRutaConsumo" style="-fx-text-fill: #142934; -fx-font-size: 20px; -fx-font-weight: bold;" text="Carga la ruta para iniciar" wrapText="true" />
+						<GridPane hgap="28.0" vgap="10.0">
+							<columnConstraints><ColumnConstraints hgrow="ALWAYS" percentWidth="33.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="33.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="34.0" /></columnConstraints>
+							<children>
+								<VBox spacing="6.0" GridPane.columnIndex="0"><children><Label style="-fx-text-fill: #60747d; -fx-font-size: 12px;" text="DISTANCIA" /><Label fx:id="lblDistanciaConsumo" style="-fx-text-fill: #142934; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- km" /></children></VBox>
+								<VBox spacing="6.0" GridPane.columnIndex="1"><children><Label style="-fx-text-fill: #60747d; -fx-font-size: 12px;" text="ESTRATEGIA" /><Label fx:id="lblEstrategiaConsumo" style="-fx-text-fill: #142934; -fx-font-size: 22px; -fx-font-weight: bold;" text="--" /></children></VBox>
+								<VBox spacing="6.0" GridPane.columnIndex="2"><children><Label style="-fx-text-fill: #60747d; -fx-font-size: 12px;" text="BATERÍA ESTIMADA" /><Label fx:id="lblBateriaConsumo" style="-fx-text-fill: #142934; -fx-font-size: 22px; -fx-font-weight: bold;" text="-- unidades" /></children></VBox>
+							</children>
+						</GridPane>
+					</children>
+				</VBox>
+				<Region VBox.vgrow="ALWAYS" />
+				<Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="Ahorro = distancia × 0.5 · Normal = distancia × 1 · Alto rendimiento = distancia × 1.5" wrapText="true" />
 			</children>
 		</VBox>
 	</children>

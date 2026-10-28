@@ -132,4 +132,21 @@ public class Mision {
     public void setDron(Dron dron) {
         this.dron = dron;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Mision)) {
+            return false;
+        }
+        Mision other = (Mision) obj;
+        return id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
 }

@@ -1,5 +1,13 @@
 package co.edu.poli.sw2.Dominio.modelo;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import co.edu.poli.sw2.Dominio.modelo.Wather.Weather;
+import co.edu.poli.sw2.Dominio.modelo.Wather.WeatherObserver;
+
 /**
  * Representa un dron dentro del sistema de gestión.
  *
@@ -45,9 +53,11 @@ public class Dron {
 	private Piloto piloto;
 
 	/**
-	 * Sensores asociados al dron.
+	 * Sensores asociados mediante la columna {@code sensores.dron_id}.
 	 */
-	private Sensores sensores;
+	private List<Sensores> sensores = new ArrayList<>();
+
+	private final CopyOnWriteArrayList<WeatherObserver> observers = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Constructor vacío de la clase Dron.
@@ -85,7 +95,7 @@ public class Dron {
 			this.fabricante = prototype.fabricante;
 			this.peso = prototype.peso;
 			this.piloto = prototype.piloto;
-			this.sensores = prototype.sensores;
+			this.sensores = new ArrayList<>(prototype.sensores);
 		}
 	}
 
@@ -101,7 +111,7 @@ public class Dron {
 	 * @param sensores sensores asociados al dron.
 	 */
 	public Dron(int id, String serial, String modelo, String fabricante,
-			int peso, Piloto piloto, Sensores sensores) {
+			int peso, Piloto piloto, List<Sensores> sensores) {
 
 		this.id = id;
 		this.serial = serial;
@@ -109,7 +119,7 @@ public class Dron {
 		this.fabricante = fabricante;
 		this.peso = peso;
 		this.piloto = piloto;
-		this.sensores = sensores;
+		setSensores(sensores);
 	}
 
 	/** @return identificador único del dron */
@@ -171,14 +181,56 @@ public class Dron {
 	public void setPiloto(Piloto piloto) {
 		this.piloto = piloto;
 	}
-	/** @return sensor asociado o {@code null} si no tiene asociación */
-	public Sensores getSensores() {
+	/** @return sensores asociados (lista vacía si no hay asociaciones) */
+	public List<Sensores> getSensores() {
 		return sensores;
 	}
 
-	/** @param sensores sensor que se asociará al dron */
-	public void setSensores(Sensores sensores) {
-		this.sensores = sensores;
+	/** @param sensores sensores que se asociarán al dron */
+	public void setSensores(List<Sensores> sensores) {
+		this.sensores = new ArrayList<>(Objects.requireNonNull(sensores, "sensores"));
+	}
+
+	/**
+	 * Suscribe un observador al dron, evitando registros duplicados.
+	 *
+	 * @param observer observador que recibirá el clima
+	 */
+	public void subscribe(WeatherObserver observer) {
+		observers.addIfAbsent(Objects.requireNonNull(observer, "observer"));
+	}
+
+	/**
+	 * Elimina del dron el observador indicado.
+	 *
+	 * @param observer observador que dejará de recibir el clima
+	 */
+	public void unsubscribe(WeatherObserver observer) {
+		observers.remove(Objects.requireNonNull(observer, "observer"));
+	}
+
+	/**
+	 * Notifica la actualización a todos los observadores suscritos.
+	 *
+	 * @param weather actualización con las cinco medidas meteorológicas
+	 */
+	public void notifyObservers(Weather weather) {
+		Objects.requireNonNull(weather, "weather");
+		IllegalStateException falloNotificacion = null;
+		for (WeatherObserver observer : observers) {
+			try {
+				observer.update(weather);
+			} catch (RuntimeException exception) {
+				if (falloNotificacion == null) {
+					falloNotificacion = new IllegalStateException(
+							"No se pudo notificar a uno o más observadores del dron " + id + ".");
+				}
+				falloNotificacion.addSuppressed(exception);
+			}
+		}
+		if (falloNotificacion != null) {
+			throw falloNotificacion;
+		}
 	}
 
 	/**
@@ -186,6 +238,23 @@ public class Dron {
 	 *
 	 * @return cadena de texto con los datos del dron.
 	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Dron)) {
+			return false;
+		}
+		Dron other = (Dron) obj;
+		return id == other.id;
+	}
+
+	@Override
+	public int hashCode() {
+		return Integer.hashCode(id);
+	}
+
 	@Override
 	public String toString() {
 		return "Dron{" +

@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "app",
+            "request": "launch",
+            "mainClass": "co.edu.poli.sw2.Vista.app",
+            "projectName": "ProyectoDrones",
+            "vmArgs": "--module-path \"${env:USERPROFILE}\\.m2\\repository\\org\\openjfx\\javafx-base\\17.0.10\\javafx-base-17.0.10-win.jar;${env:USERPROFILE}\\.m2\\repository\\org\\openjfx\\javafx-graphics\\17.0.10\\javafx-graphics-17.0.10-win.jar;${env:USERPROFILE}\\.m2\\repository\\org\\openjfx\\javafx-controls\\17.0.10\\javafx-controls-17.0.10-win.jar;${env:USERPROFILE}\\.m2\\repository\\org\\openjfx\\javafx-fxml\\17.0.10\\javafx-fxml-17.0.10-win.jar\" --add-modules javafx.controls,javafx.fxml"
+        },
+        {
             "type": "jdk",
             "request": "launch",
             "name": "Launch Java App"

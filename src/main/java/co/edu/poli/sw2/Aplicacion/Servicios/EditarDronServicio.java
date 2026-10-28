@@ -1,5 +1,7 @@
 package co.edu.poli.sw2.Aplicacion.Servicios;
 
+import java.util.List;
+
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Salida.RepositoryDron;
 import co.edu.poli.sw2.Dominio.modelo.Dron;
@@ -20,7 +22,7 @@ public class EditarDronServicio implements EditarDronUseCase {
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean actualizar(Dron dron, int pilotoId, int sensorId) {
-		return repository.actualizar(dron, pilotoId, sensorId);
+	public boolean actualizar(Dron dron, int pilotoId, List<Integer> sensorIds) {
+		return repository.actualizar(dron, pilotoId, sensorIds);
 	}
 }

@@ -45,22 +45,6 @@ INSERT INTO `dron` (`id`, `serial`, `modelo`, `fabricante`, `peso`, `piloto_id`)
 
 -- --------------------------------------------------------
 
---
--- Estructura de tabla para la tabla `dron_sensor`
---
-
-CREATE TABLE `dron_sensor` (
-  `dron_id` int(11) NOT NULL,
-  `sensor_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `dron_sensor`
---
-
-INSERT INTO `dron_sensor` (`dron_id`, `sensor_id`) VALUES
-(4, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -84,20 +68,21 @@ INSERT INTO `piloto` (`id`, `nombre`, `experiencia`, `telefono`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `sensor`
+-- Estructura de tabla para la tabla `sensores`
 --
 
-CREATE TABLE `sensor` (
+CREATE TABLE `sensores` (
   `id` int(11) NOT NULL,
   `tipo` varchar(100) NOT NULL,
-  `fabricante` varchar(100) NOT NULL
+  `fabricante` varchar(100) NOT NULL,
+  `dron_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `sensor`
+-- Volcado de datos para la tabla `sensores`
 --
 
-INSERT INTO `sensor` (`id`, `tipo`, `fabricante`) VALUES
+INSERT INTO `sensores` (`id`, `tipo`, `fabricante`) VALUES
 (1, 'Camara', 'DJI');
 
 --
@@ -113,23 +98,17 @@ ALTER TABLE `dron`
   ADD UNIQUE KEY `uq_dron_piloto` (`piloto_id`);
 
 --
--- Indices de la tabla `dron_sensor`
---
-ALTER TABLE `dron_sensor`
-  ADD PRIMARY KEY (`dron_id`,`sensor_id`),
-  ADD KEY `sensor_id` (`sensor_id`);
-
---
 -- Indices de la tabla `piloto`
 --
 ALTER TABLE `piloto`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `sensor`
+-- Indices de la tabla `sensores`
 --
-ALTER TABLE `sensor`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `sensores`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dron_id` (`dron_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -148,9 +127,9 @@ ALTER TABLE `piloto`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT de la tabla `sensor`
+-- AUTO_INCREMENT de la tabla `sensores`
 --
-ALTER TABLE `sensor`
+ALTER TABLE `sensores`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -163,12 +142,8 @@ ALTER TABLE `sensor`
 ALTER TABLE `dron`
   ADD CONSTRAINT `fk_dron_piloto` FOREIGN KEY (`piloto_id`) REFERENCES `piloto` (`id`);
 
---
--- Filtros para la tabla `dron_sensor`
---
-ALTER TABLE `dron_sensor`
-  ADD CONSTRAINT `dron_sensor_ibfk_1` FOREIGN KEY (`dron_id`) REFERENCES `dron` (`id`),
-  ADD CONSTRAINT `dron_sensor_ibfk_2` FOREIGN KEY (`sensor_id`) REFERENCES `sensor` (`id`);
+ALTER TABLE `sensores`
+  ADD CONSTRAINT `fk_sensores_dron` FOREIGN KEY (`dron_id`) REFERENCES `dron` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

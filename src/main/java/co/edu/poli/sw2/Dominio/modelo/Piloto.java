@@ -122,6 +122,29 @@ public class Piloto {
     }
 
     /**
+     * Compara dos pilotos por su identificador único.
+     *
+     * @param obj otro objeto a comparar
+     * @return {@code true} si representan el mismo piloto
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Piloto)) {
+            return false;
+        }
+        Piloto other = (Piloto) obj;
+        return id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
+
+    /**
      * Devuelve una representación textual del piloto.
      *
      * @return datos principales del piloto en formato de texto
