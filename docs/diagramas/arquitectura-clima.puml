@@ -1,0 +1,72 @@
+@startuml ArquitecturaClima
+title Integración meteorológica - arquitectura hexagonal
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario" as usuario
+
+package "Adaptadores de entrada" {
+  component "JavaFX\nDroneController" as ui
+}
+
+package "Aplicación" {
+  interface "ClimaUseCase\n(puerto de entrada)" as inPort
+  component "ClimaServicio" as service
+  component "WeatherNotificationService\n(suscripciones)" as subject
+  package "observer" {
+    component "DashboardObserver\n(Observer)" as dashboard
+  }
+}
+
+package "Dominio" {
+  class "Weather\n(5 medidas)" as weather
+  interface "WeatherObserver\n(update)" as observer
+  class "Dron\n(Subject)" as drone
+  package "Chain of Responsibility" {
+    abstract class "ClimaValidacion\n(WeatherHandler)" as handler
+    class TemperaturaValidacion
+    class HumedadValidacion
+    class VientoValidacion
+    class PresionValidacion
+    class VisibilidadValidacion
+  }
+}
+
+package "Adaptadores de salida" {
+  interface "ProveedorClima\n(puerto de salida)" as outPort
+  component "GeoAPI\n(Open-Meteo adapter)" as api
+}
+
+cloud "Open-Meteo geocoding\ngeocoding-api.open-meteo.com/v1/search" as geocoding
+cloud "Open-Meteo forecast\napi.open-meteo.com/v1/forecast" as forecast
+
+usuario --> ui
+ui --> inPort
+inPort <|.. service
+service --> outPort : busca ciudad y consulta clima
+outPort <|.. api
+api --> geocoding : 1. geocodifica ciudad
+api --> forecast : 2. consulta clima actual
+api ..> weather : mapea temperatura, humedad,\nviento, presión y visibilidad
+service --> subject : publica cada respuesta
+subject --> drone : distribuye a drones suscritos
+drone ..> observer : notifyObservers
+dashboard ..|> observer
+observer ..> weather : recibe cinco medidas
+ui --> handler : evalúa condiciones del vuelo
+handler <|-- TemperaturaValidacion
+handler <|-- HumedadValidacion
+handler <|-- VientoValidacion
+handler <|-- PresionValidacion
+handler <|-- VisibilidadValidacion
+TemperaturaValidacion --> HumedadValidacion : siguiente
+HumedadValidacion --> VientoValidacion : siguiente
+VientoValidacion --> PresionValidacion : siguiente
+PresionValidacion --> VisibilidadValidacion : siguiente
+
+note bottom of subject
+WeatherNotificationService registra y elimina
+observadores dinámicamente. Cada dron mantiene
+sus WeatherObserver y los notifica al recibir clima.
+end note
+@enduml

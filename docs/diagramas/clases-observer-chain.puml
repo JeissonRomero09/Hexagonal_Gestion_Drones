@@ -1,0 +1,199 @@
+@startuml ClasesObserverChain
+title Clases del CRUD de drones, Observer y Chain of Responsibility
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Dominio.modelo" as Domain {
+  class Agricultura {
+    - capacidadTanque: double
+  }
+
+  class Vigilancia {
+    - deteccionTermica: boolean
+  }
+
+  class Piloto {
+    - id: int
+    - nombre: String
+    - experiencia: String
+    - telefono: int
+  }
+
+  class Dron {
+    - id: int
+    - serial: String
+    - modelo: String
+    - fabricante: String
+    - peso: int
+    - piloto: Piloto
+    - sensores: List<Sensores>
+    - observers: List<WeatherObserver>
+    + subscribe(observer: WeatherObserver): void
+    + unsubscribe(observer: WeatherObserver): void
+    + notifyObservers(weather: Weather): void
+  }
+
+  class Sensores {
+    - id: int
+    - tipo: String
+    - fabricante: String
+  }
+
+  class Mision {
+    - id: int
+    - nombre: String
+    - ubicacion: String
+    - fecha: Date
+    - dron: Dron
+  }
+
+  class Weather {
+    - temperatura: double
+    - humedad: double
+    - velocidadViento: double
+    - presion: double
+    - visibilidad: double
+    + getTemperatura(): double
+    + getHumedad(): double
+    + getVelocidadViento(): double
+    + getPresion(): double
+    + getVisibilidad(): double
+  }
+
+  interface WeatherObserver {
+    + update(weather: Weather): void
+  }
+
+  package "Chain" {
+    abstract class ClimaValidacion <<Handler>> {
+      - siguiente: ClimaValidacion
+      + enlazar(siguiente: ClimaValidacion): ClimaValidacion
+      + evaluar(weather: Weather): String
+      # validarRegla(weather: Weather): String
+      + crearCadena(): ClimaValidacion
+    }
+
+    class TemperaturaValidacion {
+      # validarRegla(weather: Weather): String
+    }
+    class HumedadValidacion {
+      # validarRegla(weather: Weather): String
+    }
+    class VientoValidacion {
+      # validarRegla(weather: Weather): String
+    }
+    class PresionValidacion {
+      # validarRegla(weather: Weather): String
+    }
+    class VisibilidadValidacion {
+      # validarRegla(weather: Weather): String
+    }
+  }
+}
+
+package "Aplicacion" as Application {
+  interface ClimaUseCase <<puerto de entrada>> {
+    + buscarCiudades(consulta: String): Map
+    + consultarClima(latitud: double, longitud: double): Weather
+  }
+
+  interface ProveedorClima <<puerto de salida>> {
+    + buscarCiudades(consulta: String): Map
+    + consultarClima(latitud: double, longitud: double): Weather
+  }
+
+  class ClimaServicio {
+    - proveedorClima: ProveedorClima
+    - notificador: WeatherNotificationService
+    + buscarCiudades(consulta: String): Map
+    + consultarClima(latitud: double, longitud: double): Weather
+  }
+
+  class WeatherNotificationService {
+    - suscripciones: Map<Integer, Map<WeatherObserver, Suscripcion>>
+    + suscribir(dron: Dron, observador: WeatherObserver): boolean
+    + cancelar(dronId: int): boolean
+    + notificar(weather: Weather): void
+  }
+
+  class Suscripcion <<clase interna>> {
+    - dron: Dron
+    - observador: WeatherObserver
+  }
+
+  package "observer" {
+    class DashboardObserver {
+      - refrescarDashboard: Consumer<Weather>
+      + update(weather: Weather): void
+    }
+  }
+}
+
+package "Infraestructura" as Infrastructure {
+  class GeoAPI <<adaptador Open-Meteo>> {
+    - geocodingUrl: String
+    - forecastUrl: String
+    + buscarCiudades(consulta: String): Map
+    + consultarClima(latitud: double, longitud: double): Weather
+  }
+
+  class DroneController <<adaptador JavaFX>> {
+    + buscarCiudades(): void
+    + consultarClima(): void
+    + suscribirDron(): void
+    + cancelarSuscripcion(): void
+    + evaluarClima(): void
+  }
+}
+
+Agricultura --|> Dron
+Vigilancia --|> Dron
+Dron "0..*" --> "1" Piloto : piloto
+Dron "1" o-- "0..*" Sensores : sensores
+Dron "1" <-- "0..*" Mision : dron
+
+Dron "1" o-- "0..*" WeatherObserver : observers
+WeatherNotificationService *-- "0..*" Suscripcion
+Suscripcion --> Dron
+Suscripcion --> WeatherObserver
+WeatherNotificationService ..> Weather : publica cinco medidas
+Dron ..> Weather : notifica
+WeatherObserver ..> Weather : recibe actualización
+DashboardObserver ..|> WeatherObserver
+ClimaServicio ..|> ClimaUseCase
+ClimaServicio --> ProveedorClima
+ClimaServicio --> WeatherNotificationService : publica cada consulta exitosa
+GeoAPI ..|> ProveedorClima
+GeoAPI ..> Weather : convierte respuesta API
+DroneController --> ClimaUseCase
+DroneController --> WeatherNotificationService : suscribe / cancela
+DroneController --> ClimaValidacion : evalúa condiciones
+
+ClimaValidacion <|-- TemperaturaValidacion
+ClimaValidacion <|-- HumedadValidacion
+ClimaValidacion <|-- VientoValidacion
+ClimaValidacion <|-- PresionValidacion
+ClimaValidacion <|-- VisibilidadValidacion
+ClimaValidacion --> ClimaValidacion : siguiente
+ClimaValidacion ..> Weather
+
+note right of WeatherNotificationService
+Registra varios observadores por dron y cancela
+las suscripciones del dron seleccionado.
+Cada actualización distribuye las cinco medidas.
+end note
+
+note right of GeoAPI
+Un único adaptador realiza ambas solicitudes:
+1. Geocodificación: nombre de ciudad a coordenadas.
+2. Pronóstico actual: coordenadas a datos meteorológicos.
+El viento se obtiene en km/h y la visibilidad
+se convierte de metros a kilómetros.
+end note
+
+note bottom of DashboardObserver
+Actualiza los datos y evalúa automáticamente
+la cadena de condiciones de vuelo.
+end note
+@enduml
