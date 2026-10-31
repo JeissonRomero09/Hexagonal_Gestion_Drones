@@ -35,6 +35,7 @@
 							<Label style="-fx-text-fill: white; -fx-font-size: 29px; -fx-font-weight: bold;" text="Gestión de drones" />
 						</children></VBox>
 						<Region HBox.hgrow="ALWAYS" />
+						<Button fx:id="btnIrCommand" minWidth="120.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Tareas" />
 						<Button fx:id="btnIrClima" minWidth="120.0" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Clima" />
 						<Button fx:id="btnIrConsumo" minWidth="120.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Consumo" />
 						<Label fx:id="lblEstado" alignment="CENTER_RIGHT" maxWidth="390.0" style="-fx-text-fill: #e7f1f3; -fx-font-size: 13px;" text="Listo para gestionar la flota" wrapText="true" />
@@ -78,8 +79,6 @@
 									<Button fx:id="btnCrear" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Crear" HBox.hgrow="ALWAYS" />
 									<Button fx:id="btnActualizar" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Editar" HBox.hgrow="ALWAYS" />
 									<Button fx:id="btnEliminar" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" text="Eliminar" HBox.hgrow="ALWAYS" />
-                              <Button fx:id="btnCrear1" prefHeight="25.0" prefWidth="71.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
-                              <Button fx:id="btnCrear2" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" />
 								</children></HBox>
 							</children>
 						</VBox>
@@ -188,6 +187,45 @@
 				</VBox>
 				<Region VBox.vgrow="ALWAYS" />
 				<Label style="-fx-text-fill: #aebfc5; -fx-font-size: 12px;" text="Ahorro = distancia × 0.5 · Normal = distancia × 1 · Alto rendimiento = distancia × 1.5" wrapText="true" />
+			</children>
+		</VBox>
+		<VBox fx:id="vistaCommand" managed="false" visible="false" spacing="20.0" style="-fx-background-color: rgba(7,19,31,0.96); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+			<padding><Insets bottom="24.0" left="26.0" right="26.0" top="24.0" /></padding>
+			<children>
+				<HBox alignment="CENTER_LEFT" spacing="16.0"><children>
+					<VBox spacing="3.0"><children>
+						<Label style="-fx-text-fill: #81e4d0; -fx-font-size: 11px; -fx-font-weight: bold;" text="PATRÓN COMMAND" />
+						<Label style="-fx-text-fill: white; -fx-font-size: 25px; -fx-font-weight: bold;" text="Programación de tareas" />
+					</children></VBox>
+					<Region HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnVolverCommand" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Volver a la flota" />
+				</children></HBox>
+			<HBox alignment="CENTER_LEFT" spacing="10.0"><children>
+				<ComboBox fx:id="cmbDronesCommand" prefWidth="300.0" promptText="Selecciona un dron" HBox.hgrow="ALWAYS" />
+				<ComboBox fx:id="cmbOperacionCommand" prefWidth="230.0" promptText="Selecciona una operación" />
+				<Button fx:id="btnProgramarCommand" minWidth="140.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Programar tarea" />
+				<Button fx:id="btnEjecutarCommand" minWidth="150.0" style="-fx-background-color: #f2c879; -fx-background-radius: 6; -fx-text-fill: #302515; -fx-font-weight: bold; -fx-cursor: hand;" text="Ejecutar tareas" />
+			</children></HBox>
+			<HBox alignment="CENTER_LEFT" spacing="14.0"><children>
+				<Label fx:id="lblEstadoCommand" style="-fx-text-fill: #cad8dd; -fx-font-size: 13px;" text="Listo para programar operaciones." wrapText="true" HBox.hgrow="ALWAYS" />
+				<Button fx:id="btnLimpiarCommand" style="-fx-background-color: rgba(232,103,110,0.20); -fx-background-radius: 6; -fx-border-color: rgba(255,155,160,0.55); -fx-border-radius: 6; -fx-text-fill: #ffd6d8; -fx-font-weight: bold; -fx-cursor: hand;" text="Limpiar cola" />
+			</children></HBox>
+			<HBox spacing="14.0" VBox.vgrow="ALWAYS"><children>
+				<VBox spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+					<padding><Insets bottom="14.0" left="14.0" right="14.0" top="14.0" /></padding>
+					<children>
+						<Label style="-fx-text-fill: #142934; -fx-font-size: 16px; -fx-font-weight: bold;" text="Cola de tareas" />
+						<ListView fx:id="listaTareasCommand" style="-fx-background-color: transparent; -fx-background-radius: 6;" VBox.vgrow="ALWAYS" />
+					</children>
+				</VBox>
+				<VBox spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+					<padding><Insets bottom="14.0" left="14.0" right="14.0" top="14.0" /></padding>
+					<children>
+						<Label style="-fx-text-fill: #142934; -fx-font-size: 16px; -fx-font-weight: bold;" text="Resultados" />
+						<ListView fx:id="listaResultadosCommand" style="-fx-background-color: transparent; -fx-background-radius: 6;" VBox.vgrow="ALWAYS" />
+					</children>
+				</VBox>
+			</children></HBox>
 			</children>
 		</VBox>
 	</children>

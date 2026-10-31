@@ -14,8 +14,13 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ClimaUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Servicios.DroneOperacionService;
+import co.edu.poli.sw2.Aplicacion.Servicios.ProgramadorTareas;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
 import co.edu.poli.sw2.Aplicacion.Servicios.observer.DashboardObserver;
+import co.edu.poli.sw2.Dominio.Command.EscanearZonaCommand;
+import co.edu.poli.sw2.Dominio.Command.MedirTemperaturaCommand;
+import co.edu.poli.sw2.Dominio.Command.TomarFotografiaCommand;
 import co.edu.poli.sw2.Dominio.modelo.Chain.ClimaValidacion;
 import co.edu.poli.sw2.Dominio.modelo.Wather.Weather;
 import co.edu.poli.sw2.Dominio.modelo.Wather.WeatherObserver;
@@ -66,13 +71,35 @@ public class DroneController {
 	@FXML
 	private VBox vistaConsumo;
 	@FXML
+	private VBox vistaCommand;
+	@FXML
 	private Button btnIrClima;
 	@FXML
 	private Button btnIrConsumo;
 	@FXML
+	private Button btnIrCommand;
+	@FXML
 	private Button btnVolverCrud;
 	@FXML
 	private Button btnVolverConsumo;
+	@FXML
+	private Button btnVolverCommand;
+	@FXML
+	private Button btnProgramarCommand;
+	@FXML
+	private Button btnEjecutarCommand;
+	@FXML
+	private Button btnLimpiarCommand;
+	@FXML
+	private ComboBox<Dron> cmbDronesCommand;
+	@FXML
+	private ComboBox<String> cmbOperacionCommand;
+	@FXML
+	private ListView<String> listaTareasCommand;
+	@FXML
+	private ListView<String> listaResultadosCommand;
+	@FXML
+	private Label lblEstadoCommand;
 	@FXML
 	private Button btnCalcularConsumo;
 	@FXML
@@ -238,6 +265,7 @@ public class DroneController {
 	private final EliminarDronUseCase eliminarDronUseCase;
 	private final ClimaUseCase climaUseCase;
 	private final WeatherNotificationService notificadorClima;
+	private final ProgramadorTareas programadorTareas = new ProgramadorTareas();
 	private Map<String, double[]> ubicaciones = new LinkedHashMap<>();
 	private Weather ultimoClima;
 
@@ -305,8 +333,13 @@ public class DroneController {
 		btnListar.setOnAction(e -> listar());
 		btnIrClima.setOnAction(e -> mostrarVistaClima());
 		btnIrConsumo.setOnAction(e -> mostrarVistaConsumo());
+		btnIrCommand.setOnAction(e -> mostrarVistaCommand());
 		btnVolverCrud.setOnAction(e -> mostrarVistaCrud());
 		btnVolverConsumo.setOnAction(e -> mostrarVistaCrud());
+		btnVolverCommand.setOnAction(e -> mostrarVistaCrud());
+		btnProgramarCommand.setOnAction(e -> programarTareaCommand());
+		btnEjecutarCommand.setOnAction(e -> ejecutarTareasCommand());
+		btnLimpiarCommand.setOnAction(e -> limpiarTareasCommand());
 		btnCalcularConsumo.setOnAction(e -> calcularConsumo());
 		txtCiudad.setOnAction(e -> buscarCiudades());
 		btnConsultarClima.setOnAction(e -> consultarClima());
@@ -335,8 +368,22 @@ public class DroneController {
 				return null;
 			}
 		});
+		cmbDronesCommand.setConverter(new StringConverter<Dron>() {
+			@Override
+			public String toString(Dron dron) {
+				return dron == null ? "" : "Dron " + dron.getId() + " · " + dron.getModelo();
+			}
+
+			@Override
+			public Dron fromString(String valor) {
+				return null;
+			}
+		});
 		cmbEstrategiaConsumo.setItems(FXCollections.observableArrayList(
 				"Ahorro", "Normal", "Alto rendimiento"));
+		cmbOperacionCommand.setItems(FXCollections.observableArrayList(
+				"Tomar fotografía", "Escanear zona", "Medir temperatura"));
+		cmbOperacionCommand.getSelectionModel().selectFirst();
 		tablaDrones.getSelectionModel().selectedItemProperty().addListener((observable, anterior, seleccionado) -> {
 			if (seleccionado != null) {
 				cargarFormulario(seleccionado);
@@ -349,6 +396,8 @@ public class DroneController {
 		vistaCrud.setManaged(false);
 		vistaConsumo.setVisible(false);
 		vistaConsumo.setManaged(false);
+		vistaCommand.setVisible(false);
+		vistaCommand.setManaged(false);
 		vistaClima.setVisible(true);
 		vistaClima.setManaged(true);
 		if (climaUseCase == null || notificadorClima == null) {
@@ -368,6 +417,8 @@ public class DroneController {
 		vistaClima.setManaged(false);
 		vistaConsumo.setVisible(false);
 		vistaConsumo.setManaged(false);
+		vistaCommand.setVisible(false);
+		vistaCommand.setManaged(false);
 		vistaCrud.setVisible(true);
 		vistaCrud.setManaged(true);
 	}
@@ -377,6 +428,8 @@ public class DroneController {
 		vistaCrud.setManaged(false);
 		vistaClima.setVisible(false);
 		vistaClima.setManaged(false);
+		vistaCommand.setVisible(false);
+		vistaCommand.setManaged(false);
 		vistaConsumo.setVisible(true);
 		vistaConsumo.setManaged(true);
 		try {
@@ -390,6 +443,75 @@ public class DroneController {
 			mostrarAlerta(Alert.AlertType.ERROR, "No se pudo cargar el cálculo",
 					"Verifica la conexión de base de datos y el archivo JSON de ruta: " + exception.getMessage());
 		}
+	}
+
+	private void mostrarVistaCommand() {
+		vistaCrud.setVisible(false);
+		vistaCrud.setManaged(false);
+		vistaClima.setVisible(false);
+		vistaClima.setManaged(false);
+		vistaConsumo.setVisible(false);
+		vistaConsumo.setManaged(false);
+		vistaCommand.setVisible(true);
+		vistaCommand.setManaged(true);
+		try {
+			cmbDronesCommand.setItems(FXCollections.observableArrayList(buscarListaDronesUseCase.buscarTodos()));
+		} catch (RuntimeException exception) {
+			mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar los drones",
+					"Verifica la conexión de base de datos: " + exception.getMessage());
+		}
+	}
+
+	private void programarTareaCommand() {
+		Dron dron = cmbDronesCommand.getValue();
+		String operacion = cmbOperacionCommand.getValue();
+		if (dron == null || operacion == null) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Datos requeridos",
+					"Selecciona un dron y una operación antes de programar.");
+			return;
+		}
+
+		DroneOperacionService receptor = new DroneOperacionService(dron);
+		switch (operacion) {
+		case "Tomar fotografía":
+			programadorTareas.programar(new TomarFotografiaCommand(receptor));
+			break;
+		case "Escanear zona":
+			programadorTareas.programar(new EscanearZonaCommand(receptor));
+			break;
+		case "Medir temperatura":
+			programadorTareas.programar(new MedirTemperaturaCommand(receptor));
+			break;
+		default:
+			throw new IllegalStateException("Operación no reconocida: " + operacion);
+		}
+
+		int numeroTarea = listaTareasCommand.getItems().size() + 1;
+		listaTareasCommand.getItems().add(numeroTarea + ". " + operacion + " · dron " + dron.getId());
+		lblEstadoCommand.setText("Tarea " + numeroTarea + " agregada a la programación.");
+	}
+
+	private void ejecutarTareasCommand() {
+		if (listaTareasCommand.getItems().isEmpty()) {
+			mostrarAlerta(Alert.AlertType.INFORMATION, "Sin tareas programadas",
+					"Agrega al menos una operación para ejecutarla.");
+			return;
+		}
+		try {
+			List<String> resultados = programadorTareas.ejecutarTareas();
+			listaResultadosCommand.getItems().setAll(resultados);
+			programadorTareas.limpiarTareas();
+			listaTareasCommand.getItems().clear();
+			lblEstadoCommand.setText(resultados.size() + " operaciones ejecutadas en el orden programado.");
+		} catch (RuntimeException exception) {
+			mostrarAlerta(Alert.AlertType.ERROR, "Error al ejecutar tareas", exception.getMessage());
+		}
+	}
+
+	private void limpiarTareasCommand() {
+		programadorTareas.limpiarTareas();
+		listaTareasCommand.getItems().clear();
+		lblEstadoCommand.setText("Programación vacía.");
 	}
 
 	private void calcularConsumo() {
