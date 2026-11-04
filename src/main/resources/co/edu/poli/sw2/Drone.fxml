@@ -100,8 +100,17 @@
 										<TableColumn fx:id="colPeso" prefWidth="48.0" text="Kg" />
 										<TableColumn fx:id="colPiloto" prefWidth="66.0" text="Piloto" />
 										<TableColumn fx:id="colSensor" prefWidth="90.0" text="Sensores" />
+										<TableColumn fx:id="colEstadoOperativo" prefWidth="105.0" text="Estado" />
 								</columns>
 								</TableView>
+								<HBox spacing="6.0"><children>
+									<Button fx:id="btnEncender" text="Encender" />
+									<Button fx:id="btnDespegar" text="Despegar" />
+									<Button fx:id="btnIniciarAterrizaje" text="Iniciar aterrizaje" />
+									<Button fx:id="btnFinalizarAterrizaje" text="Finalizar aterrizaje" />
+									<Button fx:id="btnApagar" text="Apagar" />
+								</children></HBox>
+								<Label fx:id="lblEstadoOperativo" style="-fx-text-fill: #142934; -fx-font-size: 12px; -fx-font-weight: bold;" text="Selecciona un dron para gestionar su estado operativo." />
 								<Label style="-fx-text-fill: #60747d; -fx-font-size: 11px;" text="Selecciona una fila para cargar sus datos en la ficha." />
 							</children>
 						</VBox>

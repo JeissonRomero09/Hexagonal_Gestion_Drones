@@ -14,7 +14,9 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ClimaUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ManageDroneStateUseCase;
 import co.edu.poli.sw2.Aplicacion.Servicios.DroneOperacionService;
+import co.edu.poli.sw2.Aplicacion.Servicios.DroneStateService;
 import co.edu.poli.sw2.Aplicacion.Servicios.ProgramadorTareas;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
 import co.edu.poli.sw2.Aplicacion.Servicios.observer.DashboardObserver;
@@ -48,6 +50,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import java.util.logging.Logger;
+import java.util.function.IntConsumer;
 
 /**
  * Controlador encargado de gestionar la interfaz gráfica de los drones.
@@ -210,6 +213,20 @@ public class DroneController {
 	/** Columna con los IDs de los sensores asociados. */
 	@FXML
 	private TableColumn<Dron, String> colSensor;
+	@FXML
+	private TableColumn<Dron, String> colEstadoOperativo;
+	@FXML
+	private Button btnEncender;
+	@FXML
+	private Button btnDespegar;
+	@FXML
+	private Button btnIniciarAterrizaje;
+	@FXML
+	private Button btnFinalizarAterrizaje;
+	@FXML
+	private Button btnApagar;
+	@FXML
+	private Label lblEstadoOperativo;
 
 	/**
 	 * Campo de texto utilizado para ingresar el identificador del dron.
@@ -265,6 +282,7 @@ public class DroneController {
 	private final EliminarDronUseCase eliminarDronUseCase;
 	private final ClimaUseCase climaUseCase;
 	private final WeatherNotificationService notificadorClima;
+	private final ManageDroneStateUseCase manageDroneStateUseCase;
 	private final ProgramadorTareas programadorTareas = new ProgramadorTareas();
 	private Map<String, double[]> ubicaciones = new LinkedHashMap<>();
 	private Weather ultimoClima;
@@ -289,13 +307,21 @@ public class DroneController {
 			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
 			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase) {
 		this(crearDronUseCase, buscarDronUseCase, buscarListaDronesUseCase, editarDronUseCase,
-				eliminarDronUseCase, climaUseCase, null);
+				eliminarDronUseCase, climaUseCase, null, new DroneStateService());
 	}
 
 	public DroneController(CrearDronUseCase crearDronUseCase, BuscarDronUseCase buscarDronUseCase,
 			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
 			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase,
 			WeatherNotificationService notificadorClima) {
+		this(crearDronUseCase, buscarDronUseCase, buscarListaDronesUseCase, editarDronUseCase,
+				eliminarDronUseCase, climaUseCase, notificadorClima, new DroneStateService());
+	}
+
+	public DroneController(CrearDronUseCase crearDronUseCase, BuscarDronUseCase buscarDronUseCase,
+			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
+			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase,
+			WeatherNotificationService notificadorClima, ManageDroneStateUseCase manageDroneStateUseCase) {
 		this.crearDronUseCase = crearDronUseCase;
 		this.buscarDronUseCase = buscarDronUseCase;
 		this.buscarListaDronesUseCase = buscarListaDronesUseCase;
@@ -303,6 +329,7 @@ public class DroneController {
 		this.eliminarDronUseCase = eliminarDronUseCase;
 		this.climaUseCase = climaUseCase;
 		this.notificadorClima = notificadorClima;
+		this.manageDroneStateUseCase = manageDroneStateUseCase;
 	}
 
 	/**
@@ -331,6 +358,11 @@ public class DroneController {
 		btnEliminar.setOnAction(e -> eliminar());
 		btnActualizar.setOnAction(e -> actualizar());
 		btnListar.setOnAction(e -> listar());
+		btnEncender.setOnAction(e -> cambiarEstado(manageDroneStateUseCase::encender));
+		btnDespegar.setOnAction(e -> cambiarEstado(manageDroneStateUseCase::despegar));
+		btnIniciarAterrizaje.setOnAction(e -> cambiarEstado(manageDroneStateUseCase::iniciarAterrizaje));
+		btnFinalizarAterrizaje.setOnAction(e -> cambiarEstado(manageDroneStateUseCase::finalizarAterrizaje));
+		btnApagar.setOnAction(e -> cambiarEstado(manageDroneStateUseCase::apagar));
 		btnIrClima.setOnAction(e -> mostrarVistaClima());
 		btnIrConsumo.setOnAction(e -> mostrarVistaConsumo());
 		btnIrCommand.setOnAction(e -> mostrarVistaCommand());
@@ -667,6 +699,24 @@ public class DroneController {
 				celda.getValue().getPiloto() == null ? "-" : String.valueOf(celda.getValue().getPiloto().getId())));
 		colSensor.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
 				formatearSensorIds(celda.getValue().getSensores())));
+		colEstadoOperativo.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
+				manageDroneStateUseCase.obtenerEstado(celda.getValue().getId())));
+	}
+
+	private void cambiarEstado(IntConsumer operacion) {
+		Dron dron = tablaDrones.getSelectionModel().getSelectedItem();
+		if (dron == null) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido", "Selecciona un dron de la tabla.");
+			return;
+		}
+		try {
+			operacion.accept(dron.getId());
+			String estado = manageDroneStateUseCase.obtenerEstado(dron.getId());
+			lblEstadoOperativo.setText("Dron " + dron.getId() + ": " + estado);
+			tablaDrones.refresh();
+		} catch (IllegalStateException | IllegalArgumentException exception) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Operación no permitida", exception.getMessage());
+		}
 	}
 
 	/** Carga el inventario completo y presenta el resultado en la tabla. */

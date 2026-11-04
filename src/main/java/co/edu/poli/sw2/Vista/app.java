@@ -15,6 +15,7 @@ import co.edu.poli.sw2.Aplicacion.Servicios.ClimaServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.CrearDronServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.EditarDronServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.EliminarDronServicio;
+import co.edu.poli.sw2.Aplicacion.Servicios.DroneStateService;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
 import co.edu.poli.sw2.Infraestuctura.Persistencia.ConexionBD;
 import co.edu.poli.sw2.Infraestuctura.Persistencia.GeoAPI;
@@ -64,12 +65,14 @@ public class app extends Application {
         BuscarListaDronesUseCase listar = new BuscarListaDronesServicio(repository);
         EditarDronUseCase editar = new EditarDronServicio(repository);
         WeatherNotificationService notificadorClima = new WeatherNotificationService();
+        DroneStateService estadoDrones = new DroneStateService();
         ClimaUseCase clima = new ClimaServicio(new GeoAPI(), notificadorClima);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/poli/sw2/Drone.fxml"));
         loader.setControllerFactory(controllerType -> {
             if (controllerType == DroneController.class) {
-                return new DroneController(crear, buscar, listar, editar, eliminar, clima, notificadorClima);
+                return new DroneController(crear, buscar, listar, editar, eliminar, clima, notificadorClima,
+                    estadoDrones);
             }
             throw new IllegalArgumentException("Controlador no configurado: " + controllerType.getName());
         });
