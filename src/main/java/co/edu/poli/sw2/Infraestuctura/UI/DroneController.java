@@ -50,7 +50,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import java.util.logging.Logger;
-import java.util.function.IntConsumer;
+import java.util.function.Consumer;
 
 /**
  * Controlador encargado de gestionar la interfaz gráfica de los drones.
@@ -700,18 +700,18 @@ public class DroneController {
 		colSensor.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
 				formatearSensorIds(celda.getValue().getSensores())));
 		colEstadoOperativo.setCellValueFactory(celda -> new ReadOnlyObjectWrapper<String>(
-				manageDroneStateUseCase.obtenerEstado(celda.getValue().getId())));
+				manageDroneStateUseCase.obtenerEstado(celda.getValue())));
 	}
 
-	private void cambiarEstado(IntConsumer operacion) {
+	private void cambiarEstado(Consumer<Dron> operacion) {
 		Dron dron = tablaDrones.getSelectionModel().getSelectedItem();
 		if (dron == null) {
 			mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido", "Selecciona un dron de la tabla.");
 			return;
 		}
 		try {
-			operacion.accept(dron.getId());
-			String estado = manageDroneStateUseCase.obtenerEstado(dron.getId());
+			operacion.accept(dron);
+			String estado = manageDroneStateUseCase.obtenerEstado(dron);
 			lblEstadoOperativo.setText("Dron " + dron.getId() + ": " + estado);
 			tablaDrones.refresh();
 		} catch (IllegalStateException | IllegalArgumentException exception) {

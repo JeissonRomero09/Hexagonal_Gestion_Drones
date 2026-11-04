@@ -1,20 +1,28 @@
 package co.edu.poli.sw2.Dominio.state;
 
+import java.util.Objects;
+
+import co.edu.poli.sw2.Dominio.modelo.Dron;
+
 /** Contexto del patrón State; mantiene el estado operativo fuera del modelo Dron. */
 public class DronStateWrapper {
-	private final int dronId;
+	private final Dron dron;
 	private DroneState estado;
 
-	public DronStateWrapper(int dronId) {
-		if (dronId <= 0) {
-			throw new IllegalArgumentException("El ID del dron debe ser positivo.");
-		}
-		this.dronId = dronId;
-		this.estado = new OffState();
+	public DronStateWrapper(Dron dron) {
+		this(dron, new OffState());
 	}
 
-	public int getDronId() {
-		return dronId;
+	public DronStateWrapper(Dron dron, DroneState estadoInicial) {
+		this.dron = Objects.requireNonNull(dron, "dron");
+		if (dron.getId() <= 0) {
+			throw new IllegalArgumentException("El ID del dron debe ser positivo.");
+		}
+		this.estado = Objects.requireNonNull(estadoInicial, "estadoInicial");
+	}
+
+	public Dron getDron() {
+		return dron;
 	}
 
 	public String getNombreEstado() {

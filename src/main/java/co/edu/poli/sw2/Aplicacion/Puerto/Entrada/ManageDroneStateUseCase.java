@@ -1,16 +1,18 @@
 package co.edu.poli.sw2.Aplicacion.Puerto.Entrada;
 
+import co.edu.poli.sw2.Dominio.modelo.Dron;
+
 /** Operaciones de aplicación para gestionar el estado operativo de un dron. */
 public interface ManageDroneStateUseCase {
-	void encender(int dronId);
+	void encender(Dron dron);
 
-	void despegar(int dronId);
+	void despegar(Dron dron);
 
-	void iniciarAterrizaje(int dronId);
+	void iniciarAterrizaje(Dron dron);
 
-	void finalizarAterrizaje(int dronId);
+	void finalizarAterrizaje(Dron dron);
 
-	void apagar(int dronId);
+	void apagar(Dron dron);
 
-	String obtenerEstado(int dronId);
+	String obtenerEstado(Dron dron);
 }
