@@ -25,38 +25,52 @@ public class MissionCoordinator implements DroneMediator {
     }
 
     @Override
-    public MissionResult coordinateSurveillance(MissionRequest request) {
-        Objects.requireNonNull(request, "request");
+    public List<String> coordinateSurveillance(String droneIdentifier, String route,
+            List<String> requiredSensors, int availableBatteryPercentage, int requiredBatteryPercentage) {
+        Objects.requireNonNull(droneIdentifier, "droneIdentifier");
+        if (droneIdentifier.isBlank()) {
+            throw new IllegalArgumentException("droneIdentifier must not be blank");
+        }
+        List<String> sensors = List.copyOf(Objects.requireNonNull(requiredSensors, "requiredSensors"));
+        validatePercentage(availableBatteryPercentage, "availableBatteryPercentage");
+        validatePercentage(requiredBatteryPercentage, "requiredBatteryPercentage");
+
         List<String> steps = new ArrayList<>();
-        steps.add("Dron seleccionado: " + request.getDroneIdentifier() + ".");
+        steps.add("Dron seleccionado: " + droneIdentifier + ".");
 
         if (!batterySystem.hasSufficientEnergy(
-                request.getAvailableBatteryPercentage(), request.getRequiredBatteryPercentage())) {
+                availableBatteryPercentage, requiredBatteryPercentage)) {
             steps.add("Misión cancelada: batería insuficiente ("
-                    + request.getAvailableBatteryPercentage() + "% disponible; "
-                    + request.getRequiredBatteryPercentage() + "% requerido).");
-            return new MissionResult(false, steps);
+                    + availableBatteryPercentage + "% disponible; "
+                    + requiredBatteryPercentage + "% requerido).");
+            return List.copyOf(steps);
         }
-        steps.add("Batería verificada: " + request.getAvailableBatteryPercentage() + "% disponible.");
+        steps.add("Batería verificada: " + availableBatteryPercentage + "% disponible.");
 
-        if (!navigationSystem.prepareRoute(request.getRoute())) {
+        if (!navigationSystem.prepareRoute(route)) {
             steps.add("Misión cancelada: no se pudo preparar la ruta.");
-            return new MissionResult(false, steps);
+            return List.copyOf(steps);
         }
-        steps.add("Ruta preparada: " + request.getRoute().trim() + ".");
+        steps.add("Ruta preparada: " + route.trim() + ".");
 
-        if (!sensorSystem.activateSensors(request.getRequiredSensors())) {
+        if (!sensorSystem.activateSensors(sensors)) {
             steps.add("Misión cancelada: no se pudieron activar los sensores requeridos.");
-            return new MissionResult(false, steps);
+            return List.copyOf(steps);
         }
-        steps.add("Sensores activados: " + String.join(", ", request.getRequiredSensors()) + ".");
+        steps.add("Sensores activados: " + String.join(", ", sensors) + ".");
 
         if (!communicationSystem.establishLink()) {
             steps.add("Misión cancelada: no se pudo establecer el enlace de comunicación.");
-            return new MissionResult(false, steps);
+            return List.copyOf(steps);
         }
         steps.add("Enlace de comunicación establecido.");
         steps.add("Misión de vigilancia iniciada.");
-        return new MissionResult(true, steps);
+        return List.copyOf(steps);
+    }
+
+    private static void validatePercentage(int percentage, String fieldName) {
+        if (percentage < 0 || percentage > 100) {
+            throw new IllegalArgumentException(fieldName + " must be between 0 and 100");
+        }
     }
 }

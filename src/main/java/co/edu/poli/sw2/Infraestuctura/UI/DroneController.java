@@ -18,8 +18,6 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ExecuteMissionUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ManageDroneStateUseCase;
 import co.edu.poli.sw2.Aplicacion.Servicios.DroneOperacionService;
 import co.edu.poli.sw2.Aplicacion.Servicios.DroneStateService;
-import co.edu.poli.sw2.Aplicacion.mediator.MissionRequest;
-import co.edu.poli.sw2.Aplicacion.mediator.MissionResult;
 import co.edu.poli.sw2.Aplicacion.mediator.SensorCatalog;
 import co.edu.poli.sw2.Aplicacion.Servicios.ProgramadorTareas;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
@@ -45,13 +43,13 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
@@ -104,9 +102,9 @@ public class DroneController {
 	@FXML
 	private Button btnEjecutarMision;
 	@FXML
-	private ComboBox<Dron> cmbDronesMision;
-	@FXML
 	private TextField txtRutaMision;
+	@FXML
+	private ComboBox<Dron> cmbDronesMision;
 	@FXML
 	private TreeView<String> treeSensoresMision;
 	@FXML
@@ -407,15 +405,15 @@ public class DroneController {
 		btnIrClima.setOnAction(e -> mostrarVistaClima());
 		btnIrConsumo.setOnAction(e -> mostrarVistaConsumo());
 		btnIrCommand.setOnAction(e -> mostrarVistaCommand());
-		btnIrMision.setOnAction(e -> mostrarVistaMision());
 		btnVolverCrud.setOnAction(e -> mostrarVistaCrud());
 		btnVolverConsumo.setOnAction(e -> mostrarVistaCrud());
 		btnVolverCommand.setOnAction(e -> mostrarVistaCrud());
-		btnVolverMision.setOnAction(e -> mostrarVistaCrud());
-		btnEjecutarMision.setOnAction(e -> ejecutarMision());
 		btnProgramarCommand.setOnAction(e -> programarTareaCommand());
 		btnEjecutarCommand.setOnAction(e -> ejecutarTareasCommand());
 		btnLimpiarCommand.setOnAction(e -> limpiarTareasCommand());
+		btnIrMision.setOnAction(e -> mostrarVistaMision());
+		btnVolverMision.setOnAction(e -> mostrarVistaCrud());
+		btnEjecutarMision.setOnAction(e -> ejecutarMision());
 		btnCalcularConsumo.setOnAction(e -> calcularConsumo());
 		txtCiudad.setOnAction(e -> buscarCiudades());
 		btnConsultarClima.setOnAction(e -> consultarClima());
@@ -583,9 +581,11 @@ public class DroneController {
 		try {
 			List<Dron> drones = buscarListaDronesUseCase.buscarTodos();
 			cmbDronesMision.setItems(FXCollections.observableArrayList(drones));
-			lblEstadoMision.setText(drones.isEmpty()
-					? "No hay drones registrados para seleccionar."
-					: "Selecciona un dron, una ruta y al menos un sensor.");
+			if (drones.isEmpty()) {
+				lblEstadoMision.setText("No hay drones registrados para seleccionar.");
+			} else {
+				lblEstadoMision.setText("Selecciona un dron, una ruta y al menos un sensor.");
+			}
 		} catch (RuntimeException exception) {
 			LOGGER.severe("No se pudieron cargar los drones para la misión: " + exception.getMessage());
 			mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar los drones",
@@ -637,6 +637,7 @@ public class DroneController {
 					"El caso de uso de misiones no está disponible.");
 			return;
 		}
+
 		try {
 			Dron dron = cmbDronesMision.getValue();
 			if (dron == null) {
@@ -656,10 +657,10 @@ public class DroneController {
 			String identificador = dron.getSerial() == null || dron.getSerial().isBlank()
 					? "Dron " + dron.getId()
 					: dron.getSerial();
-			MissionResult resultado = executeMissionUseCase.executeMission(
-					new MissionRequest(identificador, ruta, sensores, bateriaDisponible, bateriaRequerida));
-			listaPasosMision.getItems().setAll(resultado.getSteps());
-			lblEstadoMision.setText(resultado.isStarted()
+			List<String> pasos = executeMissionUseCase.executeMission(
+					identificador, ruta, sensores, bateriaDisponible, bateriaRequerida);
+			listaPasosMision.getItems().setAll(pasos);
+			lblEstadoMision.setText(pasos.contains("Misión de vigilancia iniciada.")
 					? "Misión de vigilancia iniciada correctamente."
 					: "La misión no pudo iniciarse. Revisa la secuencia para ver el motivo.");
 		} catch (NumberFormatException exception) {
