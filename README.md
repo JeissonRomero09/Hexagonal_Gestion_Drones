@@ -149,7 +149,7 @@ Entre los patrones implementados están:
 - **Command:** operaciones de drones que se programan y ejecutan en orden. Las acciones actuales son simuladas.
 - **Observer:** notificación a drones suscritos cuando se consulta el clima.
 - **Chain of Responsibility:** evaluación secuencial de temperatura, humedad, viento, presión y visibilidad.
-- **Mediator:** `MissionCoordinator` coordina batería, ruta, sensores y comunicación para iniciar misiones de vigilancia. La vista permite seleccionar un dron existente, una ruta como `sur-norte` y sensores del catálogo; el dron se consulta, pero no se modifica ni se persiste.
+- **Mediator:** `MissionCoordinator` coordina batería, ruta, sensores y comunicación para iniciar misiones de vigilancia, recibiendo los datos directamente sin clases DTO adicionales.
 
 ## Creadores
 

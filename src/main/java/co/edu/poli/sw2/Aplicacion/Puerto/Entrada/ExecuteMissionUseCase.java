@@ -1,9 +1,9 @@
 package co.edu.poli.sw2.Aplicacion.Puerto.Entrada;
 
-import co.edu.poli.sw2.Aplicacion.mediator.MissionRequest;
-import co.edu.poli.sw2.Aplicacion.mediator.MissionResult;
+import java.util.List;
 
 /** Caso de uso para coordinar una misión de vigilancia. */
 public interface ExecuteMissionUseCase {
-    MissionResult executeMission(MissionRequest request);
+    List<String> executeMission(String droneIdentifier, String route, List<String> requiredSensors,
+            int availableBatteryPercentage, int requiredBatteryPercentage);
 }
