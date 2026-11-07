@@ -8,6 +8,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -36,6 +37,7 @@
 						</children></VBox>
 						<Region HBox.hgrow="ALWAYS" />
 						<Button fx:id="btnIrCommand" minWidth="120.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Tareas" />
+						<Button fx:id="btnIrMision" minWidth="120.0" style="-fx-background-color: #f2c879; -fx-background-radius: 6; -fx-text-fill: #302515; -fx-font-weight: bold; -fx-cursor: hand;" text="Misión" />
 						<Button fx:id="btnIrClima" minWidth="120.0" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Clima" />
 						<Button fx:id="btnIrConsumo" minWidth="120.0" style="-fx-background-color: #81e4d0; -fx-background-radius: 6; -fx-text-fill: #10242d; -fx-font-weight: bold; -fx-cursor: hand;" text="Consumo" />
 						<Label fx:id="lblEstado" alignment="CENTER_RIGHT" maxWidth="390.0" style="-fx-text-fill: #e7f1f3; -fx-font-size: 13px;" text="Listo para gestionar la flota" wrapText="true" />
@@ -235,6 +237,50 @@
 					</children>
 				</VBox>
 			</children></HBox>
+			</children>
+		</VBox>
+		<VBox fx:id="vistaMision" managed="false" visible="false" spacing="18.0" style="-fx-background-color: rgba(7,19,31,0.96); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.18); -fx-border-radius: 12;" AnchorPane.bottomAnchor="22.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="22.0">
+			<padding><Insets bottom="24.0" left="26.0" right="26.0" top="24.0" /></padding>
+			<children>
+				<HBox alignment="CENTER_LEFT" spacing="16.0"><children>
+					<VBox spacing="3.0"><children>
+						<Label style="-fx-text-fill: #f2c879; -fx-font-size: 11px; -fx-font-weight: bold;" text="PATRÓN MEDIATOR" />
+						<Label style="-fx-text-fill: white; -fx-font-size: 25px; -fx-font-weight: bold;" text="Coordinación de misión" />
+					</children></VBox>
+					<Region HBox.hgrow="ALWAYS" />
+					<Button fx:id="btnVolverMision" style="-fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.32); -fx-border-radius: 6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Volver a la flota" />
+				</children></HBox>
+				<Label style="-fx-text-fill: #cad8dd; -fx-font-size: 13px;" text="La misión se prepara en secuencia; si una condición falla, el coordinador detiene la operación." wrapText="true" />
+				<GridPane hgap="12.0" vgap="10.0">
+					<columnConstraints><ColumnConstraints hgrow="ALWAYS" percentWidth="34.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="33.0" /><ColumnConstraints hgrow="ALWAYS" percentWidth="33.0" /></columnConstraints>
+					<children>
+						<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="0"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Dron de la misión" /><ComboBox fx:id="cmbDronesMision" promptText="Selecciona un dron" maxWidth="Infinity" /></children></VBox>
+						<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.columnSpan="2"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Ruta de vigilancia (tramos separados por -)" /><TextField fx:id="txtRutaMision" promptText="Ej. sur-norte" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+						<VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Batería disponible (%)" /><TextField fx:id="txtBateriaDisponible" promptText="Ej. 85" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+						<VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1"><children><Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Batería requerida (%)" /><TextField fx:id="txtBateriaRequerida" promptText="Ej. 40" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 6;" /></children></VBox>
+					</children>
+				</GridPane>
+				<Label style="-fx-text-fill: #cad8dd; -fx-font-size: 12px;" text="Selecciona los sensores disponibles del catálogo" />
+				<HBox alignment="CENTER_LEFT" spacing="14.0"><children>
+					<Button fx:id="btnEjecutarMision" minWidth="180.0" style="-fx-background-color: #f2c879; -fx-background-radius: 6; -fx-text-fill: #302515; -fx-font-weight: bold; -fx-cursor: hand;" text="Iniciar misión" />
+					<Label fx:id="lblEstadoMision" style="-fx-text-fill: #cad8dd; -fx-font-size: 13px;" text="Ingresa los datos para coordinar la operación." wrapText="true" HBox.hgrow="ALWAYS" />
+				</children></HBox>
+				<HBox spacing="14.0" VBox.vgrow="ALWAYS"><children>
+					<VBox spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+						<padding><Insets bottom="12.0" left="14.0" right="14.0" top="12.0" /></padding>
+						<children>
+							<Label style="-fx-text-fill: #142934; -fx-font-size: 16px; -fx-font-weight: bold;" text="Sensores disponibles" />
+							<TreeView fx:id="treeSensoresMision" prefHeight="220.0" style="-fx-background-color: transparent; -fx-background-radius: 6;" VBox.vgrow="ALWAYS" />
+						</children>
+					</VBox>
+					<VBox spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.96); -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+						<padding><Insets bottom="12.0" left="14.0" right="14.0" top="12.0" /></padding>
+						<children>
+							<Label style="-fx-text-fill: #142934; -fx-font-size: 16px; -fx-font-weight: bold;" text="Secuencia coordinada" />
+							<ListView fx:id="listaPasosMision" style="-fx-background-color: transparent; -fx-background-radius: 6;" VBox.vgrow="ALWAYS" />
+						</children>
+					</VBox>
+				</children></HBox>
 			</children>
 		</VBox>
 	</children>

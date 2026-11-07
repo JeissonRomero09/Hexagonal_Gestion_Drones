@@ -9,14 +9,21 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ClimaUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ExecuteMissionUseCase;
 import co.edu.poli.sw2.Aplicacion.Servicios.BuscarDronServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.BuscarListaDronesServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.ClimaServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.CrearDronServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.EditarDronServicio;
 import co.edu.poli.sw2.Aplicacion.Servicios.EliminarDronServicio;
+import co.edu.poli.sw2.Aplicacion.Servicios.MissionService;
 import co.edu.poli.sw2.Aplicacion.Servicios.DroneStateService;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
+import co.edu.poli.sw2.Aplicacion.mediator.MissionCoordinator;
+import co.edu.poli.sw2.Aplicacion.mediator.components.BatterySystem;
+import co.edu.poli.sw2.Aplicacion.mediator.components.CommunicationSystem;
+import co.edu.poli.sw2.Aplicacion.mediator.components.NavigationSystem;
+import co.edu.poli.sw2.Aplicacion.mediator.components.SensorSystem;
 import co.edu.poli.sw2.Infraestuctura.Persistencia.ConexionBD;
 import co.edu.poli.sw2.Infraestuctura.Persistencia.GeoAPI;
 import co.edu.poli.sw2.Infraestuctura.Persistencia.MySqlDronRepository;
@@ -67,12 +74,14 @@ public class app extends Application {
         WeatherNotificationService notificadorClima = new WeatherNotificationService();
         DroneStateService estadoDrones = new DroneStateService();
         ClimaUseCase clima = new ClimaServicio(new GeoAPI(), notificadorClima);
+        ExecuteMissionUseCase ejecutarMision = new MissionService(new MissionCoordinator(
+                new NavigationSystem(), new SensorSystem(), new BatterySystem(), new CommunicationSystem()));
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/poli/sw2/Drone.fxml"));
         loader.setControllerFactory(controllerType -> {
             if (controllerType == DroneController.class) {
                 return new DroneController(crear, buscar, listar, editar, eliminar, clima, notificadorClima,
-                    estadoDrones);
+                    estadoDrones, ejecutarMision);
             }
             throw new IllegalArgumentException("Controlador no configurado: " + controllerType.getName());
         });

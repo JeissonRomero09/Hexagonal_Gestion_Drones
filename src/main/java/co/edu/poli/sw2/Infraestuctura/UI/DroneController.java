@@ -14,9 +14,13 @@ import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ClimaUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.CrearDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EditarDronUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.EliminarDronUseCase;
+import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ExecuteMissionUseCase;
 import co.edu.poli.sw2.Aplicacion.Puerto.Entrada.ManageDroneStateUseCase;
 import co.edu.poli.sw2.Aplicacion.Servicios.DroneOperacionService;
 import co.edu.poli.sw2.Aplicacion.Servicios.DroneStateService;
+import co.edu.poli.sw2.Aplicacion.mediator.MissionRequest;
+import co.edu.poli.sw2.Aplicacion.mediator.MissionResult;
+import co.edu.poli.sw2.Aplicacion.mediator.SensorCatalog;
 import co.edu.poli.sw2.Aplicacion.Servicios.ProgramadorTareas;
 import co.edu.poli.sw2.Aplicacion.Servicios.WeatherNotificationService;
 import co.edu.poli.sw2.Aplicacion.Servicios.observer.DashboardObserver;
@@ -47,8 +51,12 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.CheckBoxTreeItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
+import javafx.scene.control.cell.CheckBoxTreeCell;
 import java.util.logging.Logger;
 import java.util.function.Consumer;
 
@@ -76,17 +84,39 @@ public class DroneController {
 	@FXML
 	private VBox vistaCommand;
 	@FXML
+	private VBox vistaMision;
+	@FXML
 	private Button btnIrClima;
 	@FXML
 	private Button btnIrConsumo;
 	@FXML
 	private Button btnIrCommand;
 	@FXML
+	private Button btnIrMision;
+	@FXML
 	private Button btnVolverCrud;
 	@FXML
 	private Button btnVolverConsumo;
 	@FXML
 	private Button btnVolverCommand;
+	@FXML
+	private Button btnVolverMision;
+	@FXML
+	private Button btnEjecutarMision;
+	@FXML
+	private ComboBox<Dron> cmbDronesMision;
+	@FXML
+	private TextField txtRutaMision;
+	@FXML
+	private TreeView<String> treeSensoresMision;
+	@FXML
+	private TextField txtBateriaDisponible;
+	@FXML
+	private TextField txtBateriaRequerida;
+	@FXML
+	private Label lblEstadoMision;
+	@FXML
+	private ListView<String> listaPasosMision;
 	@FXML
 	private Button btnProgramarCommand;
 	@FXML
@@ -283,6 +313,7 @@ public class DroneController {
 	private final ClimaUseCase climaUseCase;
 	private final WeatherNotificationService notificadorClima;
 	private final ManageDroneStateUseCase manageDroneStateUseCase;
+	private final ExecuteMissionUseCase executeMissionUseCase;
 	private final ProgramadorTareas programadorTareas = new ProgramadorTareas();
 	private Map<String, double[]> ubicaciones = new LinkedHashMap<>();
 	private Weather ultimoClima;
@@ -322,6 +353,15 @@ public class DroneController {
 			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
 			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase,
 			WeatherNotificationService notificadorClima, ManageDroneStateUseCase manageDroneStateUseCase) {
+		this(crearDronUseCase, buscarDronUseCase, buscarListaDronesUseCase, editarDronUseCase,
+				eliminarDronUseCase, climaUseCase, notificadorClima, manageDroneStateUseCase, null);
+	}
+
+	public DroneController(CrearDronUseCase crearDronUseCase, BuscarDronUseCase buscarDronUseCase,
+			BuscarListaDronesUseCase buscarListaDronesUseCase, EditarDronUseCase editarDronUseCase,
+			EliminarDronUseCase eliminarDronUseCase, ClimaUseCase climaUseCase,
+			WeatherNotificationService notificadorClima, ManageDroneStateUseCase manageDroneStateUseCase,
+			ExecuteMissionUseCase executeMissionUseCase) {
 		this.crearDronUseCase = crearDronUseCase;
 		this.buscarDronUseCase = buscarDronUseCase;
 		this.buscarListaDronesUseCase = buscarListaDronesUseCase;
@@ -330,6 +370,7 @@ public class DroneController {
 		this.climaUseCase = climaUseCase;
 		this.notificadorClima = notificadorClima;
 		this.manageDroneStateUseCase = manageDroneStateUseCase;
+		this.executeMissionUseCase = executeMissionUseCase;
 	}
 
 	/**
@@ -366,9 +407,12 @@ public class DroneController {
 		btnIrClima.setOnAction(e -> mostrarVistaClima());
 		btnIrConsumo.setOnAction(e -> mostrarVistaConsumo());
 		btnIrCommand.setOnAction(e -> mostrarVistaCommand());
+		btnIrMision.setOnAction(e -> mostrarVistaMision());
 		btnVolverCrud.setOnAction(e -> mostrarVistaCrud());
 		btnVolverConsumo.setOnAction(e -> mostrarVistaCrud());
 		btnVolverCommand.setOnAction(e -> mostrarVistaCrud());
+		btnVolverMision.setOnAction(e -> mostrarVistaCrud());
+		btnEjecutarMision.setOnAction(e -> ejecutarMision());
 		btnProgramarCommand.setOnAction(e -> programarTareaCommand());
 		btnEjecutarCommand.setOnAction(e -> ejecutarTareasCommand());
 		btnLimpiarCommand.setOnAction(e -> limpiarTareasCommand());
@@ -411,6 +455,24 @@ public class DroneController {
 				return null;
 			}
 		});
+		cmbDronesMision.setConverter(new StringConverter<Dron>() {
+			@Override
+			public String toString(Dron dron) {
+				if (dron == null) {
+					return "";
+				}
+				String identificador = dron.getSerial() == null || dron.getSerial().isBlank()
+						? "Dron " + dron.getId()
+						: dron.getSerial();
+				return identificador + " · " + dron.getModelo();
+			}
+
+			@Override
+			public Dron fromString(String valor) {
+				return null;
+			}
+		});
+		inicializarArbolSensoresMision();
 		cmbEstrategiaConsumo.setItems(FXCollections.observableArrayList(
 				"Ahorro", "Normal", "Alto rendimiento"));
 		cmbOperacionCommand.setItems(FXCollections.observableArrayList(
@@ -430,6 +492,8 @@ public class DroneController {
 		vistaConsumo.setManaged(false);
 		vistaCommand.setVisible(false);
 		vistaCommand.setManaged(false);
+		vistaMision.setVisible(false);
+		vistaMision.setManaged(false);
 		vistaClima.setVisible(true);
 		vistaClima.setManaged(true);
 		if (climaUseCase == null || notificadorClima == null) {
@@ -451,6 +515,8 @@ public class DroneController {
 		vistaConsumo.setManaged(false);
 		vistaCommand.setVisible(false);
 		vistaCommand.setManaged(false);
+		vistaMision.setVisible(false);
+		vistaMision.setManaged(false);
 		vistaCrud.setVisible(true);
 		vistaCrud.setManaged(true);
 	}
@@ -462,6 +528,8 @@ public class DroneController {
 		vistaClima.setManaged(false);
 		vistaCommand.setVisible(false);
 		vistaCommand.setManaged(false);
+		vistaMision.setVisible(false);
+		vistaMision.setManaged(false);
 		vistaConsumo.setVisible(true);
 		vistaConsumo.setManaged(true);
 		try {
@@ -484,6 +552,8 @@ public class DroneController {
 		vistaClima.setManaged(false);
 		vistaConsumo.setVisible(false);
 		vistaConsumo.setManaged(false);
+		vistaMision.setVisible(false);
+		vistaMision.setManaged(false);
 		vistaCommand.setVisible(true);
 		vistaCommand.setManaged(true);
 		try {
@@ -491,6 +561,116 @@ public class DroneController {
 		} catch (RuntimeException exception) {
 			mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar los drones",
 					"Verifica la conexión de base de datos: " + exception.getMessage());
+		}
+	}
+
+	private void mostrarVistaMision() {
+		vistaCrud.setVisible(false);
+		vistaCrud.setManaged(false);
+		vistaClima.setVisible(false);
+		vistaClima.setManaged(false);
+		vistaConsumo.setVisible(false);
+		vistaConsumo.setManaged(false);
+		vistaCommand.setVisible(false);
+		vistaCommand.setManaged(false);
+		vistaMision.setVisible(true);
+		vistaMision.setManaged(true);
+		if (executeMissionUseCase == null) {
+			mostrarAlerta(Alert.AlertType.ERROR, "Mediador no configurado",
+					"El caso de uso de misiones no está disponible.");
+			return;
+		}
+		try {
+			List<Dron> drones = buscarListaDronesUseCase.buscarTodos();
+			cmbDronesMision.setItems(FXCollections.observableArrayList(drones));
+			lblEstadoMision.setText(drones.isEmpty()
+					? "No hay drones registrados para seleccionar."
+					: "Selecciona un dron, una ruta y al menos un sensor.");
+		} catch (RuntimeException exception) {
+			LOGGER.severe("No se pudieron cargar los drones para la misión: " + exception.getMessage());
+			mostrarAlerta(Alert.AlertType.ERROR, "No se pudieron cargar los drones",
+					"Verifica la conexión de base de datos: " + exception.getMessage());
+		}
+	}
+
+	private void inicializarArbolSensoresMision() {
+		CheckBoxTreeItem<String> raiz = new CheckBoxTreeItem<>("Sensor General");
+		raiz.setExpanded(true);
+		for (SensorCatalog.SensorDefinition sensor : SensorCatalog.getHierarchy()) {
+			raiz.getChildren().add(crearElementoSensor(sensor));
+		}
+		treeSensoresMision.setRoot(raiz);
+		treeSensoresMision.setShowRoot(true);
+		treeSensoresMision.setCellFactory(CheckBoxTreeCell.forTreeView());
+	}
+
+	private CheckBoxTreeItem<String> crearElementoSensor(SensorCatalog.SensorDefinition sensor) {
+		CheckBoxTreeItem<String> elemento = new CheckBoxTreeItem<>(sensor.getName());
+		elemento.setExpanded(true);
+		for (SensorCatalog.SensorDefinition hijo : sensor.getChildren()) {
+			elemento.getChildren().add(crearElementoSensor(hijo));
+		}
+		return elemento;
+	}
+
+	private List<String> obtenerSensoresSeleccionados() {
+		List<String> seleccionados = new ArrayList<>();
+		recolectarSensoresSeleccionados(treeSensoresMision.getRoot(), seleccionados);
+		return seleccionados;
+	}
+
+	private void recolectarSensoresSeleccionados(TreeItem<String> elemento, List<String> seleccionados) {
+		if (elemento instanceof CheckBoxTreeItem<?> checkBoxItem
+				&& checkBoxItem.isSelected()
+				&& elemento.getChildren().isEmpty()
+				&& SensorCatalog.getSelectableSensorNames().contains(elemento.getValue())) {
+			seleccionados.add(elemento.getValue());
+		}
+		for (TreeItem<String> hijo : elemento.getChildren()) {
+			recolectarSensoresSeleccionados(hijo, seleccionados);
+		}
+	}
+
+	private void ejecutarMision() {
+		if (executeMissionUseCase == null) {
+			mostrarAlerta(Alert.AlertType.ERROR, "Mediador no configurado",
+					"El caso de uso de misiones no está disponible.");
+			return;
+		}
+		try {
+			Dron dron = cmbDronesMision.getValue();
+			if (dron == null) {
+				mostrarAlerta(Alert.AlertType.WARNING, "Dron requerido",
+						"Selecciona el dron que ejecutará la misión.");
+				return;
+			}
+			String ruta = txtRutaMision.getText().trim();
+			List<String> sensores = obtenerSensoresSeleccionados();
+			if (sensores.isEmpty()) {
+				mostrarAlerta(Alert.AlertType.WARNING, "Sensores requeridos",
+						"Selecciona al menos un sensor del árbol de sensores.");
+				return;
+			}
+			int bateriaDisponible = Integer.parseInt(txtBateriaDisponible.getText().trim());
+			int bateriaRequerida = Integer.parseInt(txtBateriaRequerida.getText().trim());
+			String identificador = dron.getSerial() == null || dron.getSerial().isBlank()
+					? "Dron " + dron.getId()
+					: dron.getSerial();
+			MissionResult resultado = executeMissionUseCase.executeMission(
+					new MissionRequest(identificador, ruta, sensores, bateriaDisponible, bateriaRequerida));
+			listaPasosMision.getItems().setAll(resultado.getSteps());
+			lblEstadoMision.setText(resultado.isStarted()
+					? "Misión de vigilancia iniciada correctamente."
+					: "La misión no pudo iniciarse. Revisa la secuencia para ver el motivo.");
+		} catch (NumberFormatException exception) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Batería inválida",
+					"Ingresa la batería disponible y requerida como porcentajes enteros entre 0 y 100.");
+		} catch (IllegalArgumentException exception) {
+			mostrarAlerta(Alert.AlertType.WARNING, "Datos de misión inválidos", exception.getMessage());
+		} catch (RuntimeException exception) {
+			LOGGER.severe("No se pudo coordinar la misión: " + exception.getMessage());
+			mostrarAlerta(Alert.AlertType.ERROR, "Error al coordinar la misión",
+					"No se pudo completar la coordinación: " + exception.getMessage());
 		}
 	}
 
