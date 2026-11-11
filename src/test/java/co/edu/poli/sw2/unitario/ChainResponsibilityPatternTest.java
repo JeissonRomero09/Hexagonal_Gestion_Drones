@@ -2,7 +2,6 @@ package co.edu.poli.sw2.unitario;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Test;
 
 import co.edu.poli.sw2.Dominio.modelo.Chain.ClimaValidacion;

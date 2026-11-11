@@ -4,12 +4,12 @@ package co.edu.poli.sw2.Dominio.state;
 public class FlyingState implements DroneState {
 	@Override
 	public void encender(DronStateWrapper dron) {
-		throw operacionNoPermitida("encender");
+		throw operacionNoPermitida("encenders(FlyingState)");
 	}
 
 	@Override
 	public void despegar(DronStateWrapper dron) {
-		throw operacionNoPermitida("despegar");
+		throw operacionNoPermitida("despegar(FlyingState)");
 	}
 
 	@Override
@@ -19,20 +19,20 @@ public class FlyingState implements DroneState {
 
 	@Override
 	public void finalizarAterrizaje(DronStateWrapper dron) {
-		throw operacionNoPermitida("finalizar aterrizaje");
+		throw operacionNoPermitida("finalizar aterrizaje(FlyingState)");
 	}
 
 	@Override
 	public void apagar(DronStateWrapper dron) {
-		throw operacionNoPermitida("apagar");
+		throw operacionNoPermitida("apagar(FlyingState)");
 	}
 
 	@Override
 	public String getNombre() {
-		return "VOLANDO";
+		return "VOLANDO(FlyingState)";
 	}
 
 	private IllegalStateException operacionNoPermitida(String operacion) {
-		return new IllegalStateException("No se puede " + operacion + " con el dron VOLANDO.");
+		return new IllegalStateException("No se puede " + operacion + " con el dron VOLANDO(FlyingState).");
 	}
 }

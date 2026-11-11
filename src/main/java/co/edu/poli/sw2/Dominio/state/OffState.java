@@ -9,30 +9,30 @@ public class OffState implements DroneState {
 
 	@Override
 	public void despegar(DronStateWrapper dron) {
-		throw operacionNoPermitida("despegar");
+		throw operacionNoPermitida("despegar(OffState)");
 	}
 
 	@Override
 	public void iniciarAterrizaje(DronStateWrapper dron) {
-		throw operacionNoPermitida("iniciar aterrizaje");
+		throw operacionNoPermitida("iniciar aterrizaje(OffState)");
 	}
 
 	@Override
 	public void finalizarAterrizaje(DronStateWrapper dron) {
-		throw operacionNoPermitida("finalizar aterrizaje");
+		throw operacionNoPermitida("finalizar aterrizaje(OffState)");
 	}
 
 	@Override
 	public void apagar(DronStateWrapper dron) {
-		throw operacionNoPermitida("apagar");
+		throw operacionNoPermitida("apagar(OffState)");
 	}
 
 	@Override
 	public String getNombre() {
-		return "APAGADO";
+		return "APAGADO(OffState)";
 	}
 
 	private IllegalStateException operacionNoPermitida(String operacion) {
-		return new IllegalStateException("No se puede " + operacion + " con el dron APAGADO.");
+		return new IllegalStateException("No se puede " + operacion + " con el dron APAGADO(OffState).");
 	}
 }

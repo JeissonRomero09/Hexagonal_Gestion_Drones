@@ -12,10 +12,4 @@ public class NormalStrategy implements ConsumoStrategy {
 	public String getNombreEstrategia() {
 		return "Normal";
 	}
-
-	private void validarDistancia(double distanciaKm) {
-		if (!Double.isFinite(distanciaKm) || distanciaKm < 0) {
-			throw new IllegalArgumentException("La distancia debe ser un valor finito no negativo.");
-		}
-	}
 }
